@@ -180,14 +180,14 @@ const initialSeed: DatabaseSchema = {
       email: 'daliajoty@gmail.com',
       phone: '+880 1333-623162',
       rankTier: 'Executive Council',
-      title: 'Chief Management Officer (CMO)',
-      department: 'Management & Institutional Affairs',
+      title: 'Chief Communications Officer (CCO)',
+      department: 'Communications & External Affairs',
       isCEO: false,
-      accessPin: 'CMO-2026',
-      password: 'Joty#2026@cmo',
+      accessPin: 'CCO-2026',
+      password: 'Joty#2026@cco',
       ecardId: 'UYFSR-EXEC-004',
       activeSince: '30 May 2025',
-      bio: 'Stewarding comprehensive management operations, internal administration, institutional partnerships, and executive secretariat coordination.'
+      bio: 'Stewarding strategic organizational communications, media relations, institutional press engagement, and public outreach across youth research initiatives.'
     },
     {
       id: 'exec-5',

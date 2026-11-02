@@ -674,13 +674,13 @@ const INTENT_RULES: IntentRule[] = [
     patternsEn: ['shahriar mejba', 'coo', 'chief operating officer']
   },
 
-  // 47. Dalia Sultana Joty (CMO)
+  // 47. Dalia Sultana Joty (CCO)
   {
     id: 'LEADERSHIP_DALIA',
     topic: 'leadership',
-    patternsBn: ['ডালিয়া সুলতানা জোতি', 'সিএমও', 'চিফ ম্যানেজমেন্ট অফিসার'],
-    patternsBanglish: ['dalia', 'dalia sultana joty', 'joty', 'cmo', 'chief management officer'],
-    patternsEn: ['dalia sultana joty', 'cmo', 'chief management officer']
+    patternsBn: ['ডালিয়া সুলতানা জোতি', 'সিসিও', 'চিফ কমিউনিকেশন্স অফিসার'],
+    patternsBanglish: ['dalia', 'dalia sultana joty', 'joty', 'cco', 'chief communications officer'],
+    patternsEn: ['dalia sultana joty', 'cco', 'chief communications officer']
   },
 
   // 48. Jarin Tasnim (CMO)
@@ -1715,9 +1715,9 @@ export function generateElibooResponse(
     // -------------------------------------------------------------------------
     case 'LEADERSHIP_CEO': {
       return pack(
-        '👔 **মোস্তাফিজ বিন জিহাদ (Mustafiz Bin Jihad)** হলেন UYFSR-এর **প্রধান নির্বাহী কর্মকর্তা (Chief Executive Officer - CEO)** ও প্রতিষ্ঠাতা নেতৃত্ব।\n\nতিনি দেশব্যাপী তরুণদের মাঝে বৈজ্ঞানিক গবেষণা, প্রাতিষ্ঠানিক পার্টনারশিপ এবং জাতীয় পর্যায়ের অলিম্পিয়াডের সামগ্রিক দিকনির্দেশনা ও রূপরেখা পরিচালনা করছেন। তাঁর দূরদর্শী নেতৃত্বে UYFSR প্রতিষ্ঠিত হয় ৩০ মে ২০২৫ তারিখে।\n\n**কাউন্সিলের অন্যান্য শীর্ষ নেতৃবৃন্দ:**\n• **শোয়াইব ইসলাম** — চিফ রিসার্চ অফিসার (CRO)\n• **শাহরিয়ার মেজবা** — চিফ অপারেটিং অফিসার (COO)\n• **ডালিয়া সুলতানা জোতি** — চিফ ম্যানেজমেন্ট অফিসার (CMO)\n• **শাহরিয়ার তাসকির** — চিফ টেকনোলজি অফিসার (CTO)\n• **তাকী আল জাকী** — টেকনোলজি সেক্রেটারি\n• **খালেদ সাইফুল্লাহ রোহান** — উপদেষ্টা (Adviser)',
-        '👔 UYFSR-এর **Chief Executive Officer (CEO)** হলেন **Mustafiz Bin Jihad (মোস্তাফিজ বিন জিহাদ)**।\n\nতিনি সংগঠনটির সার্বিক স্ট্র্যাটেজিক রূপরেখা, জাতীয় অলিম্পিয়াড পরিচালনা ও গবেষণা নেটওয়ার্ককে সামনে থেকে নেতৃত্ব দিচ্ছেন। ২০২৫ সালের ৩০ মে তাঁর উদ্যোগে UYFSR যাত্রা শুরু করে।\n\n**অন্যান্য কি-লিডার্স:**\n• **Soyaib Islam** — Chief Research Officer (CRO)\n• **Shahriar Mejba** — Chief Operating Officer (COO)\n• **Dalia Sultana Joty** — Chief Management Officer (CMO)\n• **Shahriyar Tashkir** — Chief Technology Officer (CTO)\n• **Taki Al Zaki** — Secretary of Technology\n• **Khaled Saifullah Rohan** — Adviser',
-        '👔 The **Chief Executive Officer (CEO)** and founding leader of UYFSR is **Mustafiz Bin Jihad**.\n\nHe steers institutional alliances, nationwide research programs, and national youth science initiatives across Bangladesh. Under his stewardship, UYFSR was established on **30 May 2025**.\n\n**Other Key Leaders in the Executive Council:**\n• **Soyaib Islam** — Chief Research Officer (CRO)\n• **Shahriar Mejba** — Chief Operating Officer (COO)\n• **Dalia Sultana Joty** — Chief Management Officer (CMO)\n• **Shahriyar Tashkir** — Chief Technology Officer (CTO)\n• **Taki Al Zaki** — Secretary of Technology\n• **Khaled Saifullah Rohan** — Adviser',
+        '👔 **মোস্তাফিজ বিন জিহাদ (Mustafiz Bin Jihad)** হলেন UYFSR-এর **প্রধান নির্বাহী কর্মকর্তা (Chief Executive Officer - CEO)** ও প্রতিষ্ঠাতা নেতৃত্ব।\n\nতিনি দেশব্যাপী তরুণদের মাঝে বৈজ্ঞানিক গবেষণা, প্রাতিষ্ঠানিক পার্টনারশিপ এবং জাতীয় পর্যায়ের অলিম্পিয়াডের সামগ্রিক দিকনির্দেশনা ও রূপরেখা পরিচালনা করছেন। তাঁর দূরদর্শী নেতৃত্বে UYFSR প্রতিষ্ঠিত হয় ৩০ মে ২০২৫ তারিখে।\n\n**কাউন্সিলের অন্যান্য শীর্ষ নেতৃবৃন্দ:**\n• **শোয়াইব ইসলাম** — চিফ রিসার্চ অফিসার (CRO)\n• **শাহরিয়ার মেজবা** — চিফ অপারেটিং অফিসার (COO)\n• **ডালিয়া সুলতানা জোতি** — চিফ কমিউনিকেশন্স অফিসার (CCO)\n• **শাহরিয়ার তাসকির** — চিফ টেকনোলজি অফিসার (CTO)\n• **তাকী আল জাকী** — টেকনোলজি সেক্রেটারি\n• **খালেদ সাইফুল্লাহ রোহান** — উপদেষ্টা (Adviser)',
+        '👔 UYFSR-এর **Chief Executive Officer (CEO)** হলেন **Mustafiz Bin Jihad (মোস্তাফিজ বিন জিহাদ)**।\n\nতিনি সংগঠনটির সার্বিক স্ট্র্যাটেজিক রূপরেখা, জাতীয় অলিম্পিয়াড পরিচালনা ও গবেষণা নেটওয়ার্ককে সামনে থেকে নেতৃত্ব দিচ্ছেন। ২০২৫ সালের ৩০ মে তাঁর উদ্যোগে UYFSR যাত্রা শুরু করে।\n\n**অন্যান্য কি-লিডার্স:**\n• **Soyaib Islam** — Chief Research Officer (CRO)\n• **Shahriar Mejba** — Chief Operating Officer (COO)\n• **Dalia Sultana Joty** — Chief Communications Officer (CCO)\n• **Shahriyar Tashkir** — Chief Technology Officer (CTO)\n• **Taki Al Zaki** — Secretary of Technology\n• **Khaled Saifullah Rohan** — Adviser',
+        '👔 The **Chief Executive Officer (CEO)** and founding leader of UYFSR is **Mustafiz Bin Jihad**.\n\nHe steers institutional alliances, nationwide research programs, and national youth science initiatives across Bangladesh. Under his stewardship, UYFSR was established on **30 May 2025**.\n\n**Other Key Leaders in the Executive Council:**\n• **Soyaib Islam** — Chief Research Officer (CRO)\n• **Shahriar Mejba** — Chief Operating Officer (COO)\n• **Dalia Sultana Joty** — Chief Communications Officer (CCO)\n• **Shahriyar Tashkir** — Chief Technology Officer (CTO)\n• **Taki Al Zaki** — Secretary of Technology\n• **Khaled Saifullah Rohan** — Adviser',
         { label: 'View Full Leadership Profiles', href: '#leadership', view: 'home', anchor: 'leadership' }
       )
     }
@@ -1727,9 +1727,9 @@ export function generateElibooResponse(
     // -------------------------------------------------------------------------
     case 'LEADERSHIP_TEAM': {
       return pack(
-        '👥 **UYFSR এক্সিকিউটিভ কাউন্সিল ও পরিচালনা পর্ষদ:**\n\n• **Mustafiz Bin Jihad** — Chief Executive Officer (CEO)\n• **Fahim Samiul Islam** — Deputy Chief Executive Officer (DCEO)\n• **Shahriar Mejba** — Chief Operating Officer (COO)\n• **Soyaib Islam** — Chief Research Officer (CRO)\n• **Dalia Sultana Joty** — Chief Management Officer (CMO)\n• **Jarin Tasnim** — Chief Management Officer (CMO)\n• **Md Nabil Tahmid** — Chief Human Resources Officer (CHRO)\n• **Shahriyar Tashkir** — Chief Technology Officer (CTO)\n• **Taki Al Zaki** — Secretary of Technology\n• **Khaled Saifullah Rohan** — Adviser (উপদেষ্টা)\n• **Oasimul Rafin** — Adviser (উপদেষ্টা)',
-        '👥 **UYFSR পরিচালনা পর্ষদের সদস্যরা:**\n\n• **Mustafiz Bin Jihad** — CEO (Chief Executive Officer)\n• **Fahim Samiul Islam** — DCEO (Deputy Chief Executive Officer)\n• **Shahriar Mejba** — COO (Chief Operating Officer)\n• **Soyaib Islam** — CRO (Chief Research Officer)\n• **Dalia Sultana Joty** — CMO (Chief Management Officer)\n• **Jarin Tasnim** — CMO (Chief Management Officer)\n• **Md Nabil Tahmid** — CHRO (Chief Human Resources Officer)\n• **Shahriyar Tashkir** — CTO (Chief Technology Officer)\n• **Taki Al Zaki** — Secretary of Technology\n• **Khaled Saifullah Rohan** — Adviser\n• **Oasimul Rafin** — Adviser',
-        '👥 **UYFSR Executive Council & Governance Team:**\n\n• **Mustafiz Bin Jihad** — Chief Executive Officer (CEO)\n• **Fahim Samiul Islam** — Deputy Chief Executive Officer (DCEO)\n• **Shahriar Mejba** — Chief Operating Officer (COO)\n• **Soyaib Islam** — Chief Research Officer (CRO)\n• **Dalia Sultana Joty** — Chief Management Officer (CMO)\n• **Jarin Tasnim** — Chief Management Officer (CMO)\n• **Md Nabil Tahmid** — Chief Human Resources Officer (CHRO)\n• **Shahriyar Tashkir** — Chief Technology Officer (CTO)\n• **Taki Al Zaki** — Secretary of Technology\n• **Khaled Saifullah Rohan** — Adviser\n• **Oasimul Rafin** — Adviser',
+        '👥 **UYFSR এক্সিকিউটিভ কাউন্সিল ও পরিচালনা পর্ষদ:**\n\n• **Mustafiz Bin Jihad** — Chief Executive Officer (CEO)\n• **Fahim Samiul Islam** — Deputy Chief Executive Officer (DCEO)\n• **Shahriar Mejba** — Chief Operating Officer (COO)\n• **Soyaib Islam** — Chief Research Officer (CRO)\n• **Dalia Sultana Joty** — Chief Communications Officer (CCO)\n• **Jarin Tasnim** — Chief Management Officer (CMO)\n• **Md Nabil Tahmid** — Chief Human Resources Officer (CHRO)\n• **Shahriyar Tashkir** — Chief Technology Officer (CTO)\n• **Taki Al Zaki** — Secretary of Technology\n• **Khaled Saifullah Rohan** — Adviser (উপদেষ্টা)\n• **Oasimul Rafin** — Adviser (উপদেষ্টা)',
+        '👥 **UYFSR পরিচালনা পর্ষদের সদস্যরা:**\n\n• **Mustafiz Bin Jihad** — CEO (Chief Executive Officer)\n• **Fahim Samiul Islam** — DCEO (Deputy Chief Executive Officer)\n• **Shahriar Mejba** — COO (Chief Operating Officer)\n• **Soyaib Islam** — CRO (Chief Research Officer)\n• **Dalia Sultana Joty** — CCO (Chief Communications Officer)\n• **Jarin Tasnim** — CMO (Chief Management Officer)\n• **Md Nabil Tahmid** — CHRO (Chief Human Resources Officer)\n• **Shahriyar Tashkir** — CTO (Chief Technology Officer)\n• **Taki Al Zaki** — Secretary of Technology\n• **Khaled Saifullah Rohan** — Adviser\n• **Oasimul Rafin** — Adviser',
+        '👥 **UYFSR Executive Council & Governance Team:**\n\n• **Mustafiz Bin Jihad** — Chief Executive Officer (CEO)\n• **Fahim Samiul Islam** — Deputy Chief Executive Officer (DCEO)\n• **Shahriar Mejba** — Chief Operating Officer (COO)\n• **Soyaib Islam** — Chief Research Officer (CRO)\n• **Dalia Sultana Joty** — Chief Communications Officer (CCO)\n• **Jarin Tasnim** — Chief Management Officer (CMO)\n• **Md Nabil Tahmid** — Chief Human Resources Officer (CHRO)\n• **Shahriyar Tashkir** — Chief Technology Officer (CTO)\n• **Taki Al Zaki** — Secretary of Technology\n• **Khaled Saifullah Rohan** — Adviser\n• **Oasimul Rafin** — Adviser',
         { label: 'Meet the Leadership Team', href: '#leadership', view: 'home', anchor: 'leadership' }
       )
     }
@@ -1766,9 +1766,9 @@ export function generateElibooResponse(
 
     case 'LEADERSHIP_DALIA': {
       return pack(
-        '📋 **ডালিয়া সুলতানা জোতি (Dalia Sultana Joty)** UYFSR-এর **চিফ ম্যানেজমেন্ট অফিসার (Chief Management Officer - CMO)**। তিনি অভ্যন্তরীণ ব্যবস্থাপনা, প্রাতিষ্ঠানিক যোগাযোগ ও পরিচালনা সমন্বয় করেন।',
-        '📋 **Dalia Sultana Joty** হলেন UYFSR-এর **Chief Management Officer (CMO)**। তিনি অভ্যন্তরীণ অ্যাডমিনিস্ট্রেশন ও ম্যানেজমেন্ট পরিচালনা করেন।',
-        '📋 **Dalia Sultana Joty** serves as the **Chief Management Officer (CMO)** of UYFSR, directing management operations and secretariat governance.',
+        '📢 **ডালিয়া সুলতানা জোতি (Dalia Sultana Joty)** UYFSR-এর **চিফ কমিউনিকেশন্স অফিসার (Chief Communications Officer - CCO)**। তিনি কৌশলগত যোগাযোগ, মিডিয়া রিলেশনস ও বহির্বিশ্বে সাংগঠনিক প্রচার পরিচালনা করেন।',
+        '📢 **Dalia Sultana Joty** হলেন UYFSR-এর **Chief Communications Officer (CCO)**। তিনি সাংগঠনিক কমিউনিকেশন্স, মিডিয়া নেটওয়ার্ক ও জনসংযোগ পরিচালনা করেন।',
+        '📢 **Dalia Sultana Joty** serves as the **Chief Communications Officer (CCO)** of UYFSR, directing strategic communications, public relations, and institutional media engagement.',
         { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership' }
       )
     }

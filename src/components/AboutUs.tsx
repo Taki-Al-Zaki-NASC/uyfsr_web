@@ -67,10 +67,10 @@ const leaders: Leader[] = [
   {
     name: "Dalia Sultana Joty",
     rankTier: "Executive Council",
-    title: "Chief Management Officer (CMO)",
-    department: "Management & Institutional Coordination",
-    bio: "Stewarding comprehensive management operations, internal administration, institutional partnerships, and executive secretariat coordination.",
-    image: "/images/executives/dalia-sultana-joty-cmo.jpeg",
+    title: "Chief Communications Officer (CCO)",
+    department: "Communications & External Affairs",
+    bio: "Stewarding strategic organizational communications, media relations, institutional press engagement, and public outreach across youth research initiatives.",
+    image: "/images/executives/dalia-sultana-joty-cco.jpeg",
     facebookUrl: "https://www.facebook.com/dalia.joty",
     email: "daliajoty@gmail.com"
   },

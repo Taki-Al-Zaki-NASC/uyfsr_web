@@ -145,16 +145,16 @@ const executiveTeam: ExecutiveProfile[] = [
     id: 'UYFSR-CP-004',
     name: 'Dalia Sultana Joty',
     rankTier: 'Executive Council',
-    title: 'Chief Management Officer (CMO)',
-    department: 'Management & Institutional Coordination',
+    title: 'Chief Communications Officer (CCO)',
+    department: 'Communications & Public Relations',
     email: 'daliajoty@gmail.com',
     phone: '+880 1333-623162',
-    image: '/images/executives/dalia-sultana-joty-cmo.jpeg',
+    image: '/images/executives/dalia-sultana-joty-cco.jpeg',
     issueDate: '30 May 2025',
     clearanceLevel: 'Clearance Tier 4 · Executive Council',
     portfolioTasks: [
-      { id: 'T-06', title: 'Supervise administrative workflows and council archives', deadline: '14 Nov 2026', priority: 'High', status: 'In Progress' },
-      { id: 'T-07', title: 'Coordinate executive meetings and secretariat liaison calendar', deadline: '25 Nov 2026', priority: 'High', status: 'Completed' }
+      { id: 'T-06', title: 'Coordinate national media communications and organizational press releases', deadline: '14 Nov 2026', priority: 'High', status: 'In Progress' },
+      { id: 'T-07', title: 'Oversee institutional communications channels and stakeholder broadcasts', deadline: '25 Nov 2026', priority: 'High', status: 'Completed' }
     ]
   },
   {

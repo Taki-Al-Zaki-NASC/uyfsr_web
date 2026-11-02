@@ -15,7 +15,7 @@ const OFFICER_PHOTOS: Record<string, string> = {
   'Mustafiz Bin Jihad': '/images/executives/mustafiz-bin-jihad-ceo.jpeg',
   'Fahim Samiul Islam': '/images/executives/fahim-samiul-islam-dceo.jpeg',
   'Shahriar Mejba': '/images/executives/shahriar-mejba-coo.jpeg',
-  'Dalia Sultana Joty': '/images/executives/dalia-sultana-joty-cmo.jpeg',
+  'Dalia Sultana Joty': '/images/executives/dalia-sultana-joty-cco.jpeg',
   'Jarin Tasnim': '/images/executives/jarin-tasnim-cmo.jpeg',
   'Shahriyar Tashkir': '/images/executives/shahriyar-tashkir-cto.jpg',
   'Soyaib Islam': '/images/executives/soyaib-islam-cro.jpeg',
