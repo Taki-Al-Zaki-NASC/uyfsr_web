@@ -771,6 +771,12 @@ United Youth Forum of Science and Research
 export async function sendStatusUpdateEmail(app: Application, previousStatus: string) {
   if (!app.email) return
 
+  // Safeguard: Never send duplicate notification if status did not actually change
+  if (previousStatus && previousStatus === app.status) {
+    console.log(`[MAILER] Skipped duplicate status email for ${app.email} (already ${app.status})`)
+    return
+  }
+
   const isApproved = app.status === 'approved'
   const isUnderReview = app.status === 'under_review' || app.status === 'reviewing'
   const isPaymentVerified = app.status === 'payment_verified'

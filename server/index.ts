@@ -914,7 +914,7 @@ app.post('/api/applications/:id/status', async (req: Request, res: Response) => 
     apps[appIndex].updatedAt = new Date().toISOString()
     await db.set('applications', apps)
 
-    if (status) {
+    if (status && previousStatus !== status) {
       sendStatusUpdateEmail(apps[appIndex], previousStatus).catch((err) => {
         console.error('[EMAIL ERROR] Status change email dispatch failed:', err)
       })
@@ -1223,6 +1223,12 @@ app.post('/api/submissions/:id/approve', async (req: Request, res: Response) => 
     const appIndex = apps.findIndex((a) => a.id === id || a.trackingId === id)
     if (appIndex !== -1) {
       const prevStatus = apps[appIndex].status
+      if (prevStatus === 'approved') {
+        return res.json({
+          success: true,
+          message: 'Application is already approved.'
+        })
+      }
       apps[appIndex].status = 'approved'
       apps[appIndex].updatedAt = new Date().toISOString()
       await db.set('applications', apps)
@@ -1275,6 +1281,12 @@ app.post('/api/submissions/:id/reject', async (req: Request, res: Response) => {
     const appIndex = apps.findIndex((a) => a.id === id || a.trackingId === id)
     if (appIndex !== -1) {
       const prevStatus = apps[appIndex].status
+      if (prevStatus === 'rejected') {
+        return res.json({
+          success: true,
+          message: 'Application is already rejected.'
+        })
+      }
       apps[appIndex].status = 'rejected'
       apps[appIndex].updatedAt = new Date().toISOString()
       await db.set('applications', apps)
