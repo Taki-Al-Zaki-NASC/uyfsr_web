@@ -134,10 +134,14 @@ interface RecipientLog {
 
 const recipientThrottleMap = new Map<string, RecipientLog>()
 
-// Internal Developer / Executive Email list to protect from accidental applicant email loops
+// Internal Developer & Executive Email list to protect from all routine/minor applicant & event email spam
 const PROTECTED_INTERNAL_EMAILS = new Set([
   'ktahan629@gmail.com',
-  'uyfsr.org@gmail.com'
+  'uyfsr.org@gmail.com',
+  'daliajoty@gmail.com',
+  'tashkir2006@gmail.com',
+  'soyaib248@gmail.com',
+  'parkjarinot7@gmail.com'
 ])
 
 function checkSpamThrottle(to: string | string[], subject: string): { allow: boolean; reason?: string } {
@@ -149,9 +153,19 @@ function checkSpamThrottle(to: string | string[], subject: string): { allow: boo
     const email = (rawRecipient || '').trim().toLowerCase()
     if (!email) continue
 
+    // 1. Absolute Mute for Internal Developer & Executive Accounts:
+    // Never send student admissions, minor status changes, or routine candidate emails to developer or executive personal emails.
+    // ONLY explicit user-requested security passkey resets (OTP) are allowed through.
+    if (PROTECTED_INTERNAL_EMAILS.has(email) && !isSecurityOtp) {
+      return {
+        allow: false,
+        reason: `Muted routine notifications for internal developer/executive address (${email}). Only security OTPs are permitted.`
+      }
+    }
+
     const record = recipientThrottleMap.get(email) || { lastSentAt: 0, recentDispatches: [] }
 
-    // 1. Duplicate Subject Cooldown: Never send the exact same email subject to the same address within 5 minutes
+    // 2. Duplicate Subject Cooldown: Never send the exact same email subject to the same address within 5 minutes
     const duplicateRecent = record.recentDispatches.find(
       (d) => d.subject.trim().toLowerCase() === subject.trim().toLowerCase() && now - d.time < 5 * 60 * 1000
     )
@@ -162,23 +176,12 @@ function checkSpamThrottle(to: string | string[], subject: string): { allow: boo
       }
     }
 
-    // 2. High-Frequency Burst Throttle: Max 2 emails per 5 minutes to any recipient
+    // 3. High-Frequency Burst Throttle: Max 2 emails per 5 minutes to any recipient
     const last5MinDispatches = record.recentDispatches.filter((d) => now - d.time < 5 * 60 * 1000)
     if (last5MinDispatches.length >= 2 && !isSecurityOtp) {
       return {
         allow: false,
         reason: `Rate limit reached for ${email} (maximum 2 emails per 5 minutes window exceeded)`
-      }
-    }
-
-    // 3. Developer & Executive Protection Guard:
-    // If an applicant test was submitted with an executive/developer email, strictly prevent non-security emails
-    if (PROTECTED_INTERNAL_EMAILS.has(email) && !isSecurityOtp) {
-      if (now - record.lastSentAt < 10 * 60 * 1000) {
-        return {
-          allow: false,
-          reason: `Protected internal developer/officer address ${email}: applicant notification throttled (10m cooldown)`
-        }
       }
     }
   }
