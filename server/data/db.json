@@ -171,7 +171,7 @@
       "id": "app-1793505706833",
       "trackingId": "UYFSR-APP-2026-171205",
       "name": "Taki Al Zaki",
-      "email": "ktahan629@gmail.com",
+      "email": "applicant.taki@uyfsr.org",
       "phone": "01911287501",
       "institution": "ACPS",
       "program": "National Science Eclipse 2026",
@@ -186,13 +186,14 @@
       "mailed": true,
       "mailedAt": "2026-11-02T10:00:00.000Z",
       "mailedBy": "Mustafiz Bin Jihad",
-      "lastEmailSubject": "UYFSR Cohort Enrolment Formally Approved by CEO"
+      "lastEmailSubject": "UYFSR Cohort Enrolment Formally Approved by CEO",
+      "notifiedStatuses": ["approved"]
     },
     {
       "id": "app-amb-1793532710274",
       "trackingId": "UYFSR-AMB-2026-968564",
       "name": "Taki Al Zaki",
-      "email": "ktahan629@gmail.com",
+      "email": "ambassador.taki@uyfsr.org",
       "phone": "01911287501",
       "institution": "ACPS",
       "program": "Campus Ambassador Programme",
@@ -207,13 +208,14 @@
       "mailed": true,
       "mailedAt": "2026-11-02T10:00:00.000Z",
       "mailedBy": "Mustafiz Bin Jihad",
-      "lastEmailSubject": "Campus Ambassador Formal Appointment Confirmed"
+      "lastEmailSubject": "Campus Ambassador Formal Appointment Confirmed",
+      "notifiedStatuses": ["rejected"]
     },
     {
       "id": "app-1793509958787",
       "trackingId": "UYFSR-APP-2026-572223",
       "name": "Jurayria Islam",
-      "email": "ktahan629@gmail.com",
+      "email": "applicant.jurayria@uyfsr.org",
       "phone": "01911287501",
       "institution": "Saheed anwer bir uttam lft",
       "program": "National Science Eclipse 2026",

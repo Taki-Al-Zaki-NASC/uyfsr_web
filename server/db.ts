@@ -45,6 +45,7 @@ export interface Application {
   mailedAt?: string
   mailedBy?: string
   lastEmailSubject?: string
+  notifiedStatuses?: string[]
   createdAt: string
   updatedAt: string
 }

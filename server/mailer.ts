@@ -124,11 +124,98 @@ function getTransporter() {
   })
 }
 
+// ==========================================
+// ANTI-SPAM, DEBOUNCE & THROTTLING MECHANISM
+// ==========================================
+interface RecipientLog {
+  lastSentAt: number
+  recentDispatches: Array<{ subject: string; time: number }>
+}
+
+const recipientThrottleMap = new Map<string, RecipientLog>()
+
+// Internal Developer / Executive Email list to protect from accidental applicant email loops
+const PROTECTED_INTERNAL_EMAILS = new Set([
+  'ktahan629@gmail.com',
+  'uyfsr.org@gmail.com'
+])
+
+function checkSpamThrottle(to: string | string[], subject: string): { allow: boolean; reason?: string } {
+  const recipients = Array.isArray(to) ? to : [to]
+  const now = Date.now()
+  const isSecurityOtp = subject.includes('Passkey Reset Code') || subject.includes('Passkey Updated')
+
+  for (const rawRecipient of recipients) {
+    const email = (rawRecipient || '').trim().toLowerCase()
+    if (!email) continue
+
+    const record = recipientThrottleMap.get(email) || { lastSentAt: 0, recentDispatches: [] }
+
+    // 1. Duplicate Subject Cooldown: Never send the exact same email subject to the same address within 5 minutes
+    const duplicateRecent = record.recentDispatches.find(
+      (d) => d.subject.trim().toLowerCase() === subject.trim().toLowerCase() && now - d.time < 5 * 60 * 1000
+    )
+    if (duplicateRecent && !isSecurityOtp) {
+      return {
+        allow: false,
+        reason: `Suppressed duplicate email to ${email} (subject already sent within 5m)`
+      }
+    }
+
+    // 2. High-Frequency Burst Throttle: Max 2 emails per 5 minutes to any recipient
+    const last5MinDispatches = record.recentDispatches.filter((d) => now - d.time < 5 * 60 * 1000)
+    if (last5MinDispatches.length >= 2 && !isSecurityOtp) {
+      return {
+        allow: false,
+        reason: `Rate limit reached for ${email} (maximum 2 emails per 5 minutes window exceeded)`
+      }
+    }
+
+    // 3. Developer & Executive Protection Guard:
+    // If an applicant test was submitted with an executive/developer email, strictly prevent non-security emails
+    if (PROTECTED_INTERNAL_EMAILS.has(email) && !isSecurityOtp) {
+      if (now - record.lastSentAt < 10 * 60 * 1000) {
+        return {
+          allow: false,
+          reason: `Protected internal developer/officer address ${email}: applicant notification throttled (10m cooldown)`
+        }
+      }
+    }
+  }
+
+  return { allow: true }
+}
+
+function recordDispatch(to: string | string[], subject: string) {
+  const recipients = Array.isArray(to) ? to : [to]
+  const now = Date.now()
+  for (const rawRecipient of recipients) {
+    const email = (rawRecipient || '').trim().toLowerCase()
+    if (!email) continue
+
+    const record = recipientThrottleMap.get(email) || { lastSentAt: 0, recentDispatches: [] }
+    record.lastSentAt = now
+    record.recentDispatches.push({ subject, time: now })
+    // Keep only dispatches within last 1 hour
+    record.recentDispatches = record.recentDispatches.filter((d) => now - d.time < 60 * 60 * 1000)
+    recipientThrottleMap.set(email, record)
+  }
+}
+
 /**
  * Core dispatch function.
  */
 export async function sendEmail(options: SendEmailOptions): Promise<{ success: boolean; mode: string; id: string }> {
   const emailId = `mail-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`
+
+  // Anti-Spam Throttling Check
+  const throttleCheck = checkSpamThrottle(options.to, options.subject)
+  if (!throttleCheck.allow) {
+    console.log(`[ANTI-SPAM SHIELD] ${throttleCheck.reason}`)
+    return { success: true, mode: 'suppressed_by_anti_spam_shield', id: emailId }
+  }
+
+  recordDispatch(options.to, options.subject)
   const emailUser = process.env.GMAIL_USER || 'uyfsr.org@gmail.com'
   const emailSender = `UYFSR <${emailUser}>`
   const transporter = getTransporter()
@@ -776,6 +863,14 @@ export async function sendStatusUpdateEmail(app: Application, previousStatus: st
     console.log(`[MAILER] Skipped duplicate status email for ${app.email} (already ${app.status})`)
     return
   }
+
+  // Safeguard: Do not re-notify if this specific status was already delivered to applicant
+  if (app.notifiedStatuses && app.notifiedStatuses.includes(app.status)) {
+    console.log(`[MAILER] Notification for status "${app.status}" was already delivered to ${app.email}`)
+    return
+  }
+  if (!app.notifiedStatuses) app.notifiedStatuses = []
+  app.notifiedStatuses.push(app.status)
 
   const isApproved = app.status === 'approved'
   const isUnderReview = app.status === 'under_review' || app.status === 'reviewing'
