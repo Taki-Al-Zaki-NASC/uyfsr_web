@@ -1,0 +1,345 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Erode', Georgia, serif;
+  --font-mono: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+:root {
+  --bg: #f7f7f5;
+  --surface: #ecece9;
+  --ink: #111111;
+  --muted: #2b2b28;
+  --accent: #0c7866;
+  --accent-ink: #ffffff;
+
+  --font-display: 'Erode', Georgia, serif;
+  --font-text: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  --step-display: clamp(2.15rem, 1.4rem + 3.8vw, 5rem);
+  --step-head: clamp(1.85rem, 1.3rem + 2.4vw, 2.75rem);
+  --step-lead: 1.125rem;
+  --step-body: 16px;
+  --step-small: 14px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --t-reveal: 850ms;
+}
+
+html {
+  scrollbar-gutter: stable;
+  overflow-x: clip;
+}
+
+html, body {
+  font-family: var(--font-text);
+  background-color: var(--bg);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.55;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent unwanted iOS Safari zooming on focus when font-size < 16px */
+@media screen and (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+}
+
+.display-title {
+  font-size: var(--step-display);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  font-weight: 500;
+}
+
+.section-title {
+  font-size: var(--step-head);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  font-weight: 500;
+}
+
+.lead-text {
+  font-size: var(--step-lead);
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Taste-Skill Approved Motion Helpers - Real Scroll Intersection */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 750ms cubic-bezier(0.16, 1, 0.3, 1), transform 750ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.js [data-reveal].is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.js [data-reveal][data-delay="80"].is-revealed {
+  transition-delay: 80ms;
+}
+
+.js [data-reveal][data-delay="160"].is-revealed {
+  transition-delay: 160ms;
+}
+
+.js [data-reveal][data-delay="240"].is-revealed {
+  transition-delay: 240ms;
+}
+
+.js [data-reveal][data-delay="320"].is-revealed {
+  transition-delay: 320ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .animate-kenburns,
+  .animate-float {
+    animation: none !important;
+  }
+}
+
+/* Cinematic Slow Ken-Burns Motion for Visual Photography */
+@keyframes kenBurnsSlow {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.06) translate(-1%, -1%);
+  }
+  100% {
+    transform: scale(1) translate(0, 0);
+  }
+}
+
+/* High-Precision Fluid Motion Primitives (Apple / Linear Grade) */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translate3d(20px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translate3d(-20px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeScale {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes messagePop {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+.animate-slide-right {
+  animation: slideInRight 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-left {
+  animation: slideInLeft 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-scale {
+  animation: fadeScale 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-message-pop {
+  animation: messagePop 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+
+.animate-kenburns {
+  animation: kenBurnsSlow 20s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-float {
+  animation: floatGentle 4s ease-in-out infinite;
+}
+
+/* Infinite Partner Marquee Animation */
+@keyframes marqueeScroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 36s linear infinite;
+  will-change: transform;
+}
+
+.pause-on-hover:hover .animate-marquee-track,
+.animate-marquee-track:hover {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee-track {
+    animation: none !important;
+    transform: none !important;
+    overflow-x: auto;
+  }
+}
+
+/* ========================================================================= */
+/* CUSTOM THEMATIC SCROLLBAR MATCHING UYFSR GREEN (#0c7866)                  */
+/* Replaces ugly default Windows grey scrollbars with sleek greenish bars    */
+/* Suppresses native Win32 arrows and enforces brand identity across engines */
+/* ========================================================================= */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+::-webkit-scrollbar-track {
+  background: #dce5e1 !important;
+  border-radius: 9999px !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0c7866 !important;
+  border-radius: 9999px !important;
+  border: 1px solid #dce5e1 !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #064e43 !important;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
+
+/* Dedicated Horizontal Themed Scrollbar */
+.theme-scrollbar {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.theme-scrollbar::-webkit-scrollbar {
+  height: 7px !important;
+  width: 7px !important;
+}
+
+.theme-scrollbar::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.theme-scrollbar::-webkit-scrollbar-track {
+  background: #dce5e1 !important;
+  border-radius: 9999px !important;
+}
+
+.theme-scrollbar::-webkit-scrollbar-thumb {
+  background: #0c7866 !important;
+  border-radius: 9999px !important;
+  border: 1px solid #dce5e1 !important;
+}
+
+.theme-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #064e43 !important;
+}
+
+.theme-scrollbar::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
+
+/* Firefox standard scrollbar fallback (Only where ::-webkit-scrollbar is not supported) */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #0c7866 #dce5e1;
+  }
+  .theme-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #0c7866 #dce5e1;
+  }
+}
+
+/* No-scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+

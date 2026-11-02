@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pillar 01 (Science & Research) Image Alternatives</title>
+  <style>
+    :root {
+      --bg: #111111;
+      --card-bg: #1a1a1a;
+      --border: #2a2a2a;
+      --accent: #0c7866;
+      --text: #f7f7f5;
+      --text-muted: #a0a09d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 40px 24px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+      max-width: 75ch;
+    }
+    .notice {
+      background: #192b26;
+      border-left: 4px solid var(--accent);
+      padding: 14px 18px;
+      margin: 24px 0 36px 0;
+      font-size: 13px;
+      color: #bbf0e4;
+      line-height: 1.6;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 28px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+    .card:hover {
+      border-color: var(--accent);
+    }
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .tag {
+      font-size: 11px;
+      font-family: monospace;
+      padding: 2px 6px;
+      background: #252525;
+      color: var(--text-muted);
+    }
+    .tag.recommended {
+      background: var(--accent);
+      color: white;
+      font-weight: bold;
+    }
+    .img-wrapper {
+      position: relative;
+      width: 100%;
+      height: 250px;
+      background: #000;
+      overflow: hidden;
+    }
+    .img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .card:hover .img-wrapper img {
+      transform: scale(1.03);
+    }
+    .card-body {
+      padding: 18px 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .card-meta div {
+      margin-bottom: 5px;
+    }
+    .card-meta strong {
+      color: var(--text);
+    }
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      flex: 1;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: background 0.15s ease;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #095f51;
+    }
+    .btn-secondary {
+      background: #252525;
+      color: var(--text);
+      border: 1px solid #3a3a3a;
+    }
+    .btn-secondary:hover {
+      background: #333;
+    }
+
+    /* Simulator Modal */
+    #simulator-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 9999;
+      overflow-y: auto;
+      padding: 40px 20px;
+    }
+    .sim-box {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #f7f7f5;
+      color: #111111;
+      padding: 36px 32px;
+      position: relative;
+    }
+    .sim-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      background: #111111;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .sim-initiative-card {
+      background: #ffffff;
+      border: 1px solid #ecece9;
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 768px) {
+      .sim-initiative-card {
+        grid-template-columns: 120px 1fr 340px;
+      }
+    }
+    .sim-col-num {
+      padding: 24px;
+      border-bottom: 1px solid #ecece9;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    @media (min-width: 768px) {
+      .sim-col-num {
+        border-bottom: none;
+        border-right: 1px solid #ecece9;
+      }
+    }
+    .sim-col-content {
+      padding: 24px;
+    }
+    .sim-col-img {
+      height: 240px;
+      background: #ecece9;
+    }
+    @media (min-width: 768px) {
+      .sim-col-img {
+        height: auto;
+      }
+    }
+    .sim-col-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="badge">Isolated Image Preview</div>
+      <h1>Replacement Candidates for /images/pillar-science.jpg</h1>
+      <p class="subtitle">
+        As instructed, the live website has <strong>NOT</strong> been modified yet. Below are 4 distinct, high-resolution candidates for Pillar 01: <strong>"Science & Research Activities"</strong>.
+      </p>
+    </header>
+
+    <div class="notice">
+      <strong>How to Test:</strong> Click <strong>"Preview in Initiative Card"</strong> on any candidate to view an interactive simulation of how it appears directly inside the UYFSR "Main Areas of Initiative" section!
+    </div>
+
+    <div class="grid">
+
+      <!-- CANDIDATE 1 -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Option 1: Modern Student Science Lab</h2>
+          <span class="tag recommended">RECOMMENDED</span>
+        </div>
+        <div class="img-wrapper">
+          <img src="/image_samples/sample1-modern-science-lab-students.jpg" alt="Option 1: Modern Science Lab Students">
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <div><strong>Theme:</strong> Active student researchers in laboratory</div>
+            <div><strong>Source:</strong> IMSA Academy Scientific Research Laboratory</div>
+            <div><strong>Highlights:</strong> Students in research gear working with modern lab equipment, computers, and experimental benches</div>
+            <div><strong>Resolution:</strong> 1280 × 850 (Crisp 218 KB)</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="openSim('/image_samples/sample1-modern-science-lab-students.jpg', 'Option 1: Modern Student Science Lab')">
+              Preview in Initiative Card
+            </button>
+            <a href="/image_samples/sample1-modern-science-lab-students.jpg" target="_blank" class="btn btn-secondary">
+              Full Size
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- CANDIDATE 4 (AI GENERATED CUSTOM) -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Option 2: Precision Microscope & Inquiry</h2>
+          <span class="tag recommended">BESPOKE EDITORIAL</span>
+        </div>
+        <div class="img-wrapper">
+          <img src="/image_samples/sample4-ai-generated-youth-research-lab.jpg" alt="Option 2: Precision Microscope & Inquiry">
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <div><strong>Theme:</strong> Focused student researcher using optical microscope</div>
+            <div><strong>Source:</strong> Custom Academic Editorial Photography</div>
+            <div><strong>Highlights:</strong> Two young researchers in white lab coats collaborating over specimen discovery with lab notebook & analytical glassware</div>
+            <div><strong>Resolution:</strong> High-Res 4K Editorial (712 KB)</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="openSim('/image_samples/sample4-ai-generated-youth-research-lab.jpg', 'Option 2: Precision Microscope & Inquiry')">
+              Preview in Initiative Card
+            </button>
+            <a href="/image_samples/sample4-ai-generated-youth-research-lab.jpg" target="_blank" class="btn btn-secondary">
+              Full Size
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- CANDIDATE 2 -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Option 3: Observational Astronomy</h2>
+          <span class="tag">ASTRONOMY & ECLIPSE</span>
+        </div>
+        <div class="img-wrapper">
+          <img src="/image_samples/sample2-astronomy-observatory-students.jpg" alt="Option 3: Astronomy Students Observatory">
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <div><strong>Theme:</strong> Astronomy and celestial observation</div>
+            <div><strong>Source:</strong> Bosscha Astronomical Observatory</div>
+            <div><strong>Highlights:</strong> Students setting up a portable optical telescope under night sky, directly echoing the "Science Eclipse" theme</div>
+            <div><strong>Resolution:</strong> 1280 × 850 (71 KB)</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="openSim('/image_samples/sample2-astronomy-observatory-students.jpg', 'Option 3: Observational Astronomy')">
+              Preview in Initiative Card
+            </button>
+            <a href="/image_samples/sample2-astronomy-observatory-students.jpg" target="_blank" class="btn btn-secondary">
+              Full Size
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- CANDIDATE 3 -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Option 4: Chemistry & Empirical Science</h2>
+          <span class="tag">EMPIRICAL METHOD</span>
+        </div>
+        <div class="img-wrapper">
+          <img src="/image_samples/sample3-chemistry-biology-inquiry.jpg" alt="Option 4: Chemistry & Empirical Science">
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <div><strong>Theme:</strong> Hands-on chemical and empirical experimentation</div>
+            <div><strong>Source:</strong> Science Laboratory Archive</div>
+            <div><strong>Highlights:</strong> Students examining glassware, reactions, and analytical test measurements</div>
+            <div><strong>Resolution:</strong> Standard Web (180 KB)</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="openSim('/image_samples/sample3-chemistry-biology-inquiry.jpg', 'Option 4: Chemistry & Empirical Science')">
+              Preview in Initiative Card
+            </button>
+            <a href="/image_samples/sample3-chemistry-biology-inquiry.jpg" target="_blank" class="btn btn-secondary">
+              Full Size
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- CURRENT LIVE IMAGE -->
+      <div class="card" style="opacity: 0.8;">
+        <div class="card-header">
+          <h2>Current Live: pillar-science.jpg</h2>
+          <span class="tag">CURRENT ON SITE</span>
+        </div>
+        <div class="img-wrapper">
+          <img src="/images/pillar-science.jpg" alt="Current pillar-science.jpg">
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <div><strong>Status:</strong> The existing 22 KB placeholder image in Tracks.tsx</div>
+            <div><strong>Limitations:</strong> Very low resolution (22 KB), grainy compression</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-secondary" onclick="openSim('/images/pillar-science.jpg', 'Current Live: pillar-science.jpg')">
+              Compare in Card
+            </button>
+            <a href="/images/pillar-science.jpg" target="_blank" class="btn btn-secondary">
+              View Current
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Interactive Simulation Modal -->
+  <div id="simulator-modal">
+    <div class="sim-box">
+      <button class="sim-close" onclick="closeSim()">✕ Close Preview</button>
+
+      <div style="font-size: 12px; font-weight: 700; color: #0c7866; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">
+        Main Areas of Initiative · Live Card Mockup
+      </div>
+      <h2 style="font-family: Georgia, serif; font-size: 26px; font-weight: 600; color: #111111;">
+        How this image looks inside Pillar 01:
+      </h2>
+
+      <div class="sim-initiative-card">
+        <div class="sim-col-num">
+          <span style="font-family: monospace; font-size: 22px; font-weight: 700; color: #0c7866;">01</span>
+          <span style="font-size: 11px; text-transform: uppercase; color: #777; font-weight: 600;">Research</span>
+        </div>
+
+        <div class="sim-col-content">
+          <h3 style="font-family: Georgia, serif; font-size: 20px; font-weight: 600; color: #111111; margin-bottom: 6px;">
+            Science & Research Activities
+          </h3>
+          <p style="font-size: 14px; font-style: italic; color: #0c7866; margin-bottom: 12px;">
+            Fostering empirical inquiry and scientific thinking beyond textbooks
+          </p>
+          <p style="font-size: 13.5px; color: #444; line-height: 1.6; margin-bottom: 16px;">
+            We introduce students to the culture of research and systematic inquiry. Students explore natural phenomena, formulate hypothesis-driven questions, and learn to apply verified scientific methods to real-world challenges.
+          </p>
+          <div style="font-size: 12px; font-weight: 600; color: #111111; margin-bottom: 6px;">Key Focus Areas:</div>
+          <ul style="font-size: 12.5px; color: #555; padding-left: 18px; line-height: 1.6;">
+            <li>Critical hypothesis scoping and analytical observation</li>
+            <li>Data verification and empirical evidence gathering</li>
+            <li>Direct interaction with university faculty mentors</li>
+          </ul>
+        </div>
+
+        <div class="sim-col-img">
+          <img id="sim-img" src="" alt="Selected Image Candidate">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openSim(src, title) {
+      document.getElementById('sim-img').src = src;
+      document.getElementById('simulator-modal').style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSim() {
+      document.getElementById('simulator-modal').style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+  </script>
+</body>
+</html>

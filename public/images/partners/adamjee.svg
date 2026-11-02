@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" fill="none">
+  <rect x="12" y="16" width="32" height="28" rx="4" stroke="#111111" stroke-width="2" fill="none"/>
+  <path d="M12 25h32" stroke="#0c7866" stroke-width="2"/>
+  <circle cx="28" cy="33" r="3" fill="#0c7866"/>
+  <path d="M22 38h12" stroke="#111111" stroke-width="1.5"/>
+  <text x="56" y="32" font-family="sans-serif" font-size="12" font-weight="800" fill="#111111" letter-spacing="1">ADAMJEE SNNCC</text>
+  <text x="56" y="44" font-family="sans-serif" font-size="8" font-weight="600" fill="#0c7866" letter-spacing="0.5">NEWS &amp; COMM. CLUB</text>
+</svg>

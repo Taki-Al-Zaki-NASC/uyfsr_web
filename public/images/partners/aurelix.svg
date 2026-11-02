@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" fill="none">
+  <path d="M30 16L40 38H20L30 16Z" stroke="#0c7866" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle cx="30" cy="30" r="3" fill="#111111"/>
+  <text x="56" y="36" font-family="serif" font-size="16" font-weight="600" fill="#111111" letter-spacing="2">AURELIX</text>
+</svg>

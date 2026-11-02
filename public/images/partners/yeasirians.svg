@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" fill="none">
+  <path d="M22 18L32 30V44M42 18L32 30" stroke="#111111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="54" y="32" font-family="serif" font-size="15" font-weight="600" fill="#111111">THE</text>
+  <text x="54" y="47" font-family="sans-serif" font-size="13" font-weight="700" fill="#0c7866" letter-spacing="1">YEASIRIANS</text>
+</svg>

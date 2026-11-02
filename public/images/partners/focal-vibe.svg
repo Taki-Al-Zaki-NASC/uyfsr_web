@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" fill="none">
+  <circle cx="30" cy="30" r="14" stroke="#111111" stroke-width="2"/>
+  <circle cx="30" cy="30" r="7" fill="#0c7866"/>
+  <text x="56" y="32" font-family="sans-serif" font-size="15" font-weight="700" fill="#111111" letter-spacing="0.5">THE FOCAL</text>
+  <text x="56" y="46" font-family="sans-serif" font-size="13" font-weight="400" fill="#0c7866" letter-spacing="2">VIBE</text>
+</svg>

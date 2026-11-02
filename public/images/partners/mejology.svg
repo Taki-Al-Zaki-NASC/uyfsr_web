@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" fill="none">
+  <path d="M18 42V18L28 32L38 18V42" stroke="#0c7866" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="50" y="34" font-family="serif" font-size="17" font-weight="600" fill="#111111" letter-spacing="1">MEJOLOGY</text>
+  <text x="50" y="47" font-family="sans-serif" font-size="10" font-weight="500" fill="#52524e" letter-spacing="1.5">EDUCATION</text>
+</svg>

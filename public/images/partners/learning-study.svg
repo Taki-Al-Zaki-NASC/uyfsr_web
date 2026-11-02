@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" fill="none">
+  <path d="M20 38C26 34 32 34 38 38V20C32 16 26 16 20 20V38Z" stroke="#111111" stroke-width="2" fill="none"/>
+  <path d="M38 38C44 34 50 34 56 38V20C50 16 44 16 38 20V38Z" stroke="#0c7866" stroke-width="2" fill="none"/>
+  <text x="64" y="30" font-family="sans-serif" font-size="12" font-weight="700" fill="#111111">LEARNING &amp; STUDY</text>
+  <text x="64" y="44" font-family="sans-serif" font-size="10" font-weight="500" fill="#0c7866" letter-spacing="1">ORGANIZATION</text>
+</svg>

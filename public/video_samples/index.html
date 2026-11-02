@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UYFSR Hero Video & Poster Samples Showcase</title>
+  <style>
+    :root {
+      --bg: #111111;
+      --card-bg: #1a1a1a;
+      --border: #2a2a2a;
+      --accent: #0c7866;
+      --text: #f7f7f5;
+      --text-muted: #a0a09d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 40px 24px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+      max-width: 75ch;
+    }
+    .notice {
+      background: #192b26;
+      border-left: 4px solid var(--accent);
+      padding: 14px 18px;
+      margin: 24px 0 36px 0;
+      font-size: 13px;
+      color: #bbf0e4;
+      line-height: 1.6;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 28px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .card:hover {
+      border-color: var(--accent);
+    }
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .tag {
+      font-size: 11px;
+      font-family: monospace;
+      padding: 2px 6px;
+      background: #252525;
+      color: var(--text-muted);
+    }
+    .tag.recommended {
+      background: var(--accent);
+      color: white;
+      font-weight: bold;
+    }
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      height: 240px;
+      background: #000;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .card-body {
+      padding: 18px 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      space-y: 6px;
+    }
+    .card-meta div {
+      margin-bottom: 4px;
+    }
+    .card-meta strong {
+      color: var(--text);
+    }
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      flex: 1;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: background 0.15s ease;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #095f51;
+    }
+    .btn-secondary {
+      background: #252525;
+      color: var(--text);
+      border: 1px solid #3a3a3a;
+    }
+    .btn-secondary:hover {
+      background: #333;
+    }
+
+    /* Live Hero Simulator Modal */
+    #hero-simulator {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 9999;
+      overflow-y: auto;
+      padding: 40px 20px;
+    }
+    .sim-content {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #f7f7f5;
+      color: #111111;
+      padding: 40px 32px;
+      position: relative;
+    }
+    .sim-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      background: #111111;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .sim-hero-banner {
+      width: 100%;
+      height: 480px;
+      background: #ecece9;
+      overflow: hidden;
+      margin-top: 24px;
+    }
+    .sim-hero-banner video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="badge">Isolated Preview Environment</div>
+      <h1>Hero Video & Poster Candidates for UYFSR</h1>
+      <p class="subtitle">
+        As requested, the main website (<a href="http://localhost:5173" style="color: var(--accent); text-decoration: underline;" target="_blank">http://localhost:5173</a>) has <strong>NOT</strong> been modified. These high-resolution candidates are hosted here in this dedicated preview gallery so you can play, inspect, and compare them before choosing.
+      </p>
+    </header>
+
+    <div class="notice">
+      <strong>Important:</strong> You can watch all samples looping below with their custom poster frames. Click <strong>"Preview in Hero Layout"</strong> on any candidate to see exactly how it would appear inside the live UYFSR masthead and header on the actual homepage.
+    </div>
+
+    <div class="grid">
+
+      <!-- SAMPLE 1: Total Solar Eclipse (ESA) -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Option 1: Total Solar Eclipse</h2>
+          <span class="tag recommended">RECOMMENDED</span>
+        </div>
+        <div class="video-wrapper">
+          <video
+            src="/video_samples/sample1-total-solar-eclipse.webm"
+            poster="/video_samples/sample1-total-solar-eclipse-poster.jpg"
+            controls
+            autoplay
+            muted
+            loop
+            playsinline
+          ></video>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <div><strong>Source:</strong> European Space Agency (ESA) Astronomer Expedition</div>
+            <div><strong>Event Match:</strong> Directly aligns with <em>"National Science Eclipse 2026"</em></div>
+            <div><strong>Visuals:</strong> Solar corona, solar chromosphere flares, lunar beads, diamond ring effect</div>
+            <div><strong>Resolution:</strong> 1080p Full HD · 1.79 MB (ultra-lightweight, 0 lag)</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="openHeroSimulation('/video_samples/sample1-total-solar-eclipse.webm', '/video_samples/sample1-total-solar-eclipse-poster.jpg', 'ESA Total Solar Eclipse 2026')">
+              Preview in Hero Layout
+            </button>
+            <a href="/video_samples/sample1-total-solar-eclipse-poster.jpg" target="_blank" class="btn btn-secondary">
+              View Poster
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- SAMPLE 2: Empirical Laboratory Research (CDC) -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Option 2: Empirical Lab Research</h2>
+          <span class="tag">LABORATORY</span>
+        </div>
+        <div class="video-wrapper">
+          <video
+            src="/video_samples/sample2-empirical-lab-research.webm"
+            poster="/video_samples/sample2-empirical-lab-research-poster.jpg"
+            controls
+            autoplay
+            muted
+            loop
+            playsinline
+          ></video>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <div><strong>Source:</strong> CDC Science & Laboratory Research Archive</div>
+            <div><strong>Theme:</strong> Student scientists, bioscience, microscopy, test tubes & active laboratory work</div>
+            <div><strong>Visuals:</strong> Modern pipettes, fume hoods, empirical research methodology</div>
+            <div><strong>Resolution:</strong> 720p HD · 5.82 MB (Public Domain)</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="openHeroSimulation('/video_samples/sample2-empirical-lab-research.webm', '/video_samples/sample2-empirical-lab-research-poster.jpg', 'Empirical Laboratory Research')">
+              Preview in Hero Layout
+            </button>
+            <a href="/video_samples/sample2-empirical-lab-research-poster.jpg" target="_blank" class="btn btn-secondary">
+              View Poster
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- SAMPLE 3: Very Large Telescope & Night Sky Stars (ESO) -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Option 3: VLT Observatory & Stars</h2>
+          <span class="tag">DEEP SPACE</span>
+        </div>
+        <div class="video-wrapper">
+          <video
+            src="/video_samples/sample3-vlt-observatory-stars.webm"
+            poster="/video_samples/sample3-vlt-observatory-stars-poster.jpg"
+            controls
+            autoplay
+            muted
+            loop
+            playsinline
+          ></video>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <div><strong>Source:</strong> European Southern Observatory (ESO) / Paranal</div>
+            <div><strong>Theme:</strong> World-class astronomical research, deep space exploration & physics</div>
+            <div><strong>Visuals:</strong> Giant telescope dome rotation under celestial Milky Way star tracks</div>
+            <div><strong>Resolution:</strong> 1080p Full HD · 6.42 MB</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="openHeroSimulation('/video_samples/sample3-vlt-observatory-stars.webm', '/video_samples/sample3-vlt-observatory-stars-poster.jpg', 'VLT Observatory & Starfield Timelapse')">
+              Preview in Hero Layout
+            </button>
+            <a href="/video_samples/sample3-vlt-observatory-stars-poster.jpg" target="_blank" class="btn btn-secondary">
+              View Poster
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- CURRENT LIVE: MSC Science Garden -->
+      <div class="card" style="opacity: 0.85;">
+        <div class="card-header">
+          <h2>Current Live: MSC Science Garden</h2>
+          <span class="tag">CURRENT ON SITE</span>
+        </div>
+        <div class="video-wrapper">
+          <video
+            src="/video/msc-science-garden.webm"
+            poster="/video/msc-science-garden-poster.jpg"
+            controls
+            muted
+            loop
+            playsinline
+          ></video>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <div><strong>Source:</strong> Wikimedia Commons / Crosji</div>
+            <div><strong>Status:</strong> The existing botanical garden video currently in Hero.tsx</div>
+            <div><strong>Visuals:</strong> Outdoor garden pond, plants and water reflections</div>
+            <div><strong>Resolution:</strong> 352 × 288 (Standard Def) · 552 KB</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-secondary" onclick="openHeroSimulation('/video/msc-science-garden.webm', '/video/msc-science-garden-poster.jpg', 'Current: MSC Science Garden')">
+              Compare in Hero Layout
+            </button>
+            <a href="/video/msc-science-garden-poster.jpg" target="_blank" class="btn btn-secondary">
+              View Poster
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Hero Layout Modal Simulator -->
+  <div id="hero-simulator">
+    <div class="sim-content">
+      <button class="sim-close" onclick="closeHeroSimulation()">✕ Close Preview</button>
+      
+      <div style="font-size: 12px; font-weight: 700; color: #0c7866; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
+        UYFSR Mockup Simulation
+      </div>
+      <h1 id="sim-title" style="font-family: Georgia, serif; font-size: 38px; font-weight: 500; color: #111111; line-height: 1.15; max-width: 18ch;">
+        Scientific research and student innovation forum.
+      </h1>
+      <p style="font-size: 16px; color: #2b2b28; margin-top: 14px; max-width: 65ch; line-height: 1.6;">
+        United Youth Forum of Science and Research (UYFSR) is an educational, research, and non-profit organization established on 30 May 2025.
+      </p>
+
+      <!-- Simulated Banner -->
+      <div class="sim-hero-banner">
+        <video id="sim-video" autoplay muted loop playsinline></video>
+      </div>
+      <div style="padding: 12px 16px; background: #ecece9; font-size: 13px; color: #2b2b28; display: flex; justify-content: space-between;">
+        <span id="sim-caption">Candidate preview</span>
+        <span>United Youth Forum of Science and Research Archives</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openHeroSimulation(src, poster, title) {
+      const modal = document.getElementById('hero-simulator');
+      const video = document.getElementById('sim-video');
+      const caption = document.getElementById('sim-caption');
+      
+      video.src = src;
+      video.poster = poster;
+      video.load();
+      video.play();
+
+      caption.innerText = 'Preview Plate: ' + title;
+      modal.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeHeroSimulation() {
+      const modal = document.getElementById('hero-simulator');
+      const video = document.getElementById('sim-video');
+      video.pause();
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+  </script>
+</body>
+</html>
