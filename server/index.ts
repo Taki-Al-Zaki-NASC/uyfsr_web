@@ -206,16 +206,28 @@ async function getAuthOfficer(req: Request): Promise<Executive | null> {
     }
   }
 
-  // 3. Officer name header fallback for development & local resilience
-  const officerNameHeader = (req.headers['x-officer-name'] as string)?.trim()
-  if (officerNameHeader) {
-    const found = executives.find(
-      (e) => e.name.toLowerCase() === officerNameHeader.toLowerCase()
-    )
-    if (found) return found
-  }
-
+  // Strict Cryptographic Token Enforcement (Zero unauthenticated header spoofing)
   return null
+}
+
+// Security Helper: Validate uploaded image data URIs / URLs against XSS / javascript: injection
+function isSafeImageSource(src?: string): boolean {
+  if (!src || typeof src !== 'string') return false
+  const trimmed = src.trim()
+  if (trimmed.length > 2 * 1024 * 1024) return false // 2MB max per single image
+  if (trimmed.startsWith('/images/')) return true
+  if (/^https:\/\//i.test(trimmed)) return true
+  if (/^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+$/i.test(trimmed)) return true
+  if (/^data:image\/svg\+xml;base64,[A-Za-z0-9+/=]+$/i.test(trimmed)) {
+    try {
+      const decoded = Buffer.from(trimmed.split(',')[1] || '', 'base64').toString('utf8')
+      if (/<script|on\w+\s*=|javascript:/i.test(decoded)) return false
+      return true
+    } catch {
+      return false
+    }
+  }
+  return false
 }
 
 // ==========================================
@@ -376,7 +388,7 @@ app.post('/api/auth/executive-register', publicFormLimiter, async (req: Request,
       email: cleanEmail,
       phone: cleanPhone,
       dob: cleanDob,
-      photo: typeof photo === 'string' && photo.length > 10 ? photo : undefined,
+      photo: isSafeImageSource(photo) ? photo.trim() : undefined,
       facebookUrl: typeof facebookUrl === 'string' && facebookUrl.trim() ? facebookUrl.trim() : undefined,
       password: cleanPass,
       accessPin: cleanPass,
@@ -460,7 +472,7 @@ app.put('/api/executives/me', async (req: Request, res: Response) => {
         if (typeof dob === 'string') e.dob = dob.trim()
         if (typeof department === 'string' && department.trim().length >= 2) e.department = department.trim()
         if (typeof bio === 'string' && bio.trim().length >= 2) e.bio = bio.trim()
-        if (typeof photo === 'string' && photo.trim().length > 5) e.photo = photo.trim()
+        if (isSafeImageSource(photo)) e.photo = photo.trim()
         if (typeof facebookUrl === 'string') e.facebookUrl = facebookUrl.trim()
         if (typeof newPassword === 'string' && newPassword.trim().length >= 6) {
           e.password = newPassword.trim()
@@ -601,7 +613,12 @@ app.put('/api/site-content', async (req: Request, res: Response) => {
       hero: hero ? { ...current.hero, ...hero } : current.hero,
       missionVision: missionVision ? { ...current.missionVision, ...missionVision } : current.missionVision,
       events: Array.isArray(events) ? events : current.events,
-      partners: Array.isArray(partners) ? partners : current.partners,
+      partners: Array.isArray(partners)
+        ? partners.map((p: any) => ({
+            ...p,
+            logo: isSafeImageSource(p?.logo) ? p.logo.trim() : '/images/partners/twimbol.png'
+          }))
+        : current.partners,
       faqs: Array.isArray(faqs) ? faqs : current.faqs
     }
 

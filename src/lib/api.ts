@@ -138,6 +138,9 @@ export async function apiLogin(
   if (data?.token && typeof window !== 'undefined') {
     try {
       localStorage.setItem('uyfsr_auth_token', data.token)
+      if (data.officer) {
+        localStorage.setItem('uyfsr_executive_officer', JSON.stringify(data.officer))
+      }
     } catch {}
   }
   return data as {
