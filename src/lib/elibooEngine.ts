@@ -1,4 +1,5 @@
 import { EXPANDED_SCIENCE_CONCEPTS } from './elibooKnowledgeBase'
+import { matchOrgKnowledge } from './elibooOrgKnowledge'
 import {
   evaluateMathCalculation,
   getQuizResponse,
@@ -33,6 +34,7 @@ export interface ElibooResponse {
     href: string
     view?: 'home' | 'register' | 'executive-login' | 'dashboard' | 'ambassador'
     anchor?: string
+    leaderName?: string
   }
   suggestedQuestions: string[]
   detectedLanguage: LanguageMode
@@ -1280,7 +1282,19 @@ export function generateElibooResponse(
 
   const qLower = query.toLowerCase().trim()
 
-    // 0. Dynamic Math, Formulas & Constants Calculation
+  // 0. UYFSR Master Organizational Knowledge Matcher (Highest Priority for all Org & Leadership Queries)
+  const orgMatch = matchOrgKnowledge(query)
+  if (orgMatch) {
+    return pack(
+      orgMatch.bn,
+      orgMatch.banglish,
+      orgMatch.en,
+      orgMatch.actionLink,
+      ['ক্যাম্পাস অ্যাম্বাসেডর', 'পরবর্তী ইভেন্ট', 'বিকাশ পেমেন্ট', 'সকল নেতৃত্ব']
+    )
+  }
+
+  // 1. Dynamic Math, Formulas & Constants Calculation
   const mathRes = evaluateMathCalculation(query)
   if (mathRes) {
     return pack(
@@ -1713,12 +1727,37 @@ export function generateElibooResponse(
     // -------------------------------------------------------------------------
     // 33. LEADERSHIP - CEO MUSTAFIZ BIN JIHAD
     // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // 33. LEADERSHIP - CEO MUSTAFIZ BIN JIHAD
+    // -------------------------------------------------------------------------
     case 'LEADERSHIP_CEO': {
       return pack(
-        '👔 **মোস্তাফিজ বিন জিহাদ (Mustafiz Bin Jihad)** হলেন UYFSR-এর **প্রধান নির্বাহী কর্মকর্তা (Chief Executive Officer - CEO)** ও প্রতিষ্ঠাতা নেতৃত্ব।\n\nতিনি দেশব্যাপী তরুণদের মাঝে বৈজ্ঞানিক গবেষণা, প্রাতিষ্ঠানিক পার্টনারশিপ এবং জাতীয় পর্যায়ের অলিম্পিয়াডের সামগ্রিক দিকনির্দেশনা ও রূপরেখা পরিচালনা করছেন। তাঁর দূরদর্শী নেতৃত্বে UYFSR প্রতিষ্ঠিত হয় ৩০ মে ২০২৫ তারিখে।\n\n**কাউন্সিলের অন্যান্য শীর্ষ নেতৃবৃন্দ:**\n• **শোয়াইব ইসলাম** — চিফ রিসার্চ অফিসার (CRO)\n• **শাহরিয়ার মেজবা** — চিফ অপারেটিং অফিসার (COO)\n• **ডালিয়া সুলতানা জোতি** — চিফ কমিউনিকেশন্স অফিসার (CCO)\n• **শাহরিয়ার তাসকির** — চিফ টেকনোলজি অফিসার (CTO)\n• **তাকী আল জাকী** — টেকনোলজি সেক্রেটারি\n• **খালেদ সাইফুল্লাহ রোহান** — উপদেষ্টা (Adviser)',
-        '👔 UYFSR-এর **Chief Executive Officer (CEO)** হলেন **Mustafiz Bin Jihad (মোস্তাফিজ বিন জিহাদ)**।\n\nতিনি সংগঠনটির সার্বিক স্ট্র্যাটেজিক রূপরেখা, জাতীয় অলিম্পিয়াড পরিচালনা ও গবেষণা নেটওয়ার্ককে সামনে থেকে নেতৃত্ব দিচ্ছেন। ২০২৫ সালের ৩০ মে তাঁর উদ্যোগে UYFSR যাত্রা শুরু করে।\n\n**অন্যান্য কি-লিডার্স:**\n• **Soyaib Islam** — Chief Research Officer (CRO)\n• **Shahriar Mejba** — Chief Operating Officer (COO)\n• **Dalia Sultana Joty** — Chief Communications Officer (CCO)\n• **Shahriyar Tashkir** — Chief Technology Officer (CTO)\n• **Taki Al Zaki** — Secretary of Technology\n• **Khaled Saifullah Rohan** — Adviser',
-        '👔 The **Chief Executive Officer (CEO)** and founding leader of UYFSR is **Mustafiz Bin Jihad**.\n\nHe steers institutional alliances, nationwide research programs, and national youth science initiatives across Bangladesh. Under his stewardship, UYFSR was established on **30 May 2025**.\n\n**Other Key Leaders in the Executive Council:**\n• **Soyaib Islam** — Chief Research Officer (CRO)\n• **Shahriar Mejba** — Chief Operating Officer (COO)\n• **Dalia Sultana Joty** — Chief Communications Officer (CCO)\n• **Shahriyar Tashkir** — Chief Technology Officer (CTO)\n• **Taki Al Zaki** — Secretary of Technology\n• **Khaled Saifullah Rohan** — Adviser',
-        { label: 'View Full Leadership Profiles', href: '#leadership', view: 'home', anchor: 'leadership' }
+        '👔 **মোস্তাফিজ বিন জিহাদ (Mustafiz Bin Jihad)**\n\n' +
+        '• **পদবি:** প্রধান নির্বাহী কর্মকর্তা (Chief Executive Officer - CEO) ও প্রতিষ্ঠাতা নেতৃত্ব\n' +
+        '• **বিভাগ:** Executive Council & Strategic Vision\n' +
+        '• **মোবাইল:** `+880 1824-798147`\n' +
+        '• **ইমেইল:** `mostafizbinjihad@gmail.com`\n' +
+        '• **ফেসবুক:** [Facebook Profile](https://www.facebook.com/share/1J6Aei7Kqf/)\n' +
+        '• **রেফারেল ভাউচার:** `UYFSR-REF-MBJ2026` (রেজিস্ট্রেশন ফিতে ২০% ছাড়)\n' +
+        '• **দায়িত্ব:** দেশব্যাপী তরুণদের মাঝে বৈজ্ঞানিক গবেষণা, কেন্দ্রীয় পার্টনারশিপ ও জাতীয় অলিম্পিয়াডের সামগ্রিক রূপরেখা পরিচালনা করছেন। তাঁর নেতৃত্বে UYFSR প্রতিষ্ঠিত হয় ৩০ মে ২০২৫ তারিখে।',
+
+        '👔 **Mustafiz Bin Jihad (Chief Executive Officer - CEO):**\n\n' +
+        '• Title: CEO & Founding Leader of UYFSR\n' +
+        '• Mobile: +880 1824-798147\n' +
+        '• Email: mostafizbinjihad@gmail.com\n' +
+        '• Facebook: https://www.facebook.com/share/1J6Aei7Kqf/\n' +
+        '• Voucher Code: UYFSR-REF-MBJ2026 (20% off)\n' +
+        'He steers nationwide research initiatives and national science cohorts.',
+
+        '👔 **Mustafiz Bin Jihad — Chief Executive Officer (CEO):**\n\n' +
+        '• **Designation:** CEO & Founding Leadership\n' +
+        '• **Department:** Executive Council & Strategic Vision\n' +
+        '• **Phone:** `+880 1824-798147`\n' +
+        '• **Email:** `mostafizbinjihad@gmail.com`\n' +
+        '• **Facebook:** [Profile Link](https://www.facebook.com/share/1J6Aei7Kqf/)\n' +
+        '• **Referral Voucher:** `UYFSR-REF-MBJ2026` (20% discount)\n' +
+        '• **Scope:** Leading national youth science exploration, institutional alliances, and research initiatives.',
+        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership', leaderName: 'Mustafiz Bin Jihad' }
       )
     }
 
@@ -1727,9 +1766,44 @@ export function generateElibooResponse(
     // -------------------------------------------------------------------------
     case 'LEADERSHIP_TEAM': {
       return pack(
-        '👥 **UYFSR এক্সিকিউটিভ কাউন্সিল ও পরিচালনা পর্ষদ:**\n\n• **Mustafiz Bin Jihad** — Chief Executive Officer (CEO)\n• **Fahim Samiul Islam** — Deputy Chief Executive Officer (DCEO)\n• **Shahriar Mejba** — Chief Operating Officer (COO)\n• **Soyaib Islam** — Chief Research Officer (CRO)\n• **Dalia Sultana Joty** — Chief Communications Officer (CCO)\n• **Jarin Tasnim** — Chief Management Officer (CMO)\n• **Md Nabil Tahmid** — Chief Human Resources Officer (CHRO)\n• **Shahriyar Tashkir** — Chief Technology Officer (CTO)\n• **Taki Al Zaki** — Secretary of Technology\n• **Khaled Saifullah Rohan** — Adviser (উপদেষ্টা)\n• **Oasimul Rafin** — Adviser (উপদেষ্টা)',
-        '👥 **UYFSR পরিচালনা পর্ষদের সদস্যরা:**\n\n• **Mustafiz Bin Jihad** — CEO (Chief Executive Officer)\n• **Fahim Samiul Islam** — DCEO (Deputy Chief Executive Officer)\n• **Shahriar Mejba** — COO (Chief Operating Officer)\n• **Soyaib Islam** — CRO (Chief Research Officer)\n• **Dalia Sultana Joty** — CCO (Chief Communications Officer)\n• **Jarin Tasnim** — CMO (Chief Management Officer)\n• **Md Nabil Tahmid** — CHRO (Chief Human Resources Officer)\n• **Shahriyar Tashkir** — CTO (Chief Technology Officer)\n• **Taki Al Zaki** — Secretary of Technology\n• **Khaled Saifullah Rohan** — Adviser\n• **Oasimul Rafin** — Adviser',
-        '👥 **UYFSR Executive Council & Governance Team:**\n\n• **Mustafiz Bin Jihad** — Chief Executive Officer (CEO)\n• **Fahim Samiul Islam** — Deputy Chief Executive Officer (DCEO)\n• **Shahriar Mejba** — Chief Operating Officer (COO)\n• **Soyaib Islam** — Chief Research Officer (CRO)\n• **Dalia Sultana Joty** — Chief Communications Officer (CCO)\n• **Jarin Tasnim** — Chief Management Officer (CMO)\n• **Md Nabil Tahmid** — Chief Human Resources Officer (CHRO)\n• **Shahriyar Tashkir** — Chief Technology Officer (CTO)\n• **Taki Al Zaki** — Secretary of Technology\n• **Khaled Saifullah Rohan** — Adviser\n• **Oasimul Rafin** — Adviser',
+        '👥 **UYFSR এক্সিকিউটিভ কাউন্সিল, উপদেষ্টা ও সচিবালয় ডিরেক্টরি:**\n\n' +
+        '• **মোস্তাফিজ বিন জিহাদ** — Chief Executive Officer (CEO) | `+880 1824-798147`\n' +
+        '• **ফাহিম সামিউল ইসলাম** — Deputy Chief Executive Officer (DCEO) | `+880 1303-290971`\n' +
+        '• **শাহরিয়ার মেজবা** — Chief Operating Officer (COO) | `+880 1410-581821`\n' +
+        '• **শোয়াইব ইসলাম** — Chief Research Officer (CRO) | `+880 1349-359808`\n' +
+        '• **ডালিয়া সুলতানা জ্যোতি** — Chief Communications Officer (CCO) | `+880 1333-623162`\n' +
+        '• **জারিন তাসনিম** — Chief Management Officer (CMO) | `+880 1333-623162`\n' +
+        '• **মো: নাবিল তাহমিদ** — Chief Human Resources Officer (CHRO) | `+880 1617-607048`\n' +
+        '• **শাহরিয়ার তাসকির** — Chief Technology Officer (CTO) | `+880 1349-359808`\n' +
+        '• **তাকি আল জাকি** — Secretary of Technology | `+880 1911-287501`\n' +
+        '• **খালেদ সাইফুল্লাহ রোহান** — Adviser (উপদেষ্টা) | `+880 1736-309347`\n' +
+        '• **ওয়াসিমুল রাফিন** — Adviser (উপদেষ্টা) | `+880 1855-052383`',
+
+        '👥 **UYFSR পরিচালনা পর্ষদের সম্পূর্ণ তালিকা:**\n\n' +
+        '• Mustafiz Bin Jihad (CEO) — +880 1824-798147\n' +
+        '• Fahim Samiul Islam (DCEO) — +880 1303-290971\n' +
+        '• Shahriar Mejba (COO) — +880 1410-581821\n' +
+        '• Soyaib Islam (CRO) — +880 1349-359808\n' +
+        '• Dalia Sultana Joty (CCO) — +880 1333-623162\n' +
+        '• Jarin Tasnim (CMO) — +880 1333-623162\n' +
+        '• Md Nabil Tahmid (CHRO) — +880 1617-607048\n' +
+        '• Shahriyar Tashkir (CTO) — +880 1349-359808\n' +
+        '• Taki Al Zaki (Sec. of Tech) — +880 1911-287501\n' +
+        '• Khaled Saifullah Rohan (Adviser) — +880 1736-309347\n' +
+        '• Oasimul Rafin (Adviser) — +880 1855-052383',
+
+        '👥 **UYFSR Executive Council & Governance Team Directory:**\n\n' +
+        '• **Mustafiz Bin Jihad** (CEO) — `+880 1824-798147` | mostafizbinjihad@gmail.com\n' +
+        '• **Fahim Samiul Islam** (DCEO) — `+880 1303-290971` | samiulislamfahim8@gmail.com\n' +
+        '• **Shahriar Mejba** (COO) — `+880 1410-581821` | mejbaacps2007@gmail.com\n' +
+        '• **Soyaib Islam** (CRO) — `+880 1349-359808` | soyaib248@gmail.com\n' +
+        '• **Dalia Sultana Joty** (CCO) — `+880 1333-623162` | daliajoty@gmail.com\n' +
+        '• **Jarin Tasnim** (CMO) — `+880 1333-623162` | parkjarinot7@gmail.com\n' +
+        '• **Md Nabil Tahmid** (CHRO) — `+880 1617-607048` | hassantahmid312@gmail.com\n' +
+        '• **Shahriyar Tashkir** (CTO) — `+880 1349-359808` | tashkir2006@gmail.com\n' +
+        '• **Taki Al Zaki** (Secretary of Technology) — `+880 1911-287501` | ktahan629@gmail.com\n' +
+        '• **Khaled Saifullah Rohan** (Adviser) — `+880 1736-309347` | rohan232619@gmail.com\n' +
+        '• **Oasimul Rafin** (Adviser) — `+880 1855-052383` | Oasimulrafin@gmail.com',
         { label: 'Meet the Leadership Team', href: '#leadership', view: 'home', anchor: 'leadership' }
       )
     }
@@ -1739,91 +1813,234 @@ export function generateElibooResponse(
     // -------------------------------------------------------------------------
     case 'LEADERSHIP_FAHIM': {
       return pack(
-        '💼 **ফাহিম সামিউল ইসলাম (Fahim Samiul Islam)** UYFSR-এর **ডেপুটি চিফ এক্সিকিউটিভ অফিসার (Deputy Chief Executive Officer - DCEO)**। তিনি সংগঠনের প্রাতিষ্ঠানিক কৌশল, কর্মসূচি পরিচালনা ও শীর্ষ নেতৃত্বে সমন্বয় করেন।',
-        '💼 **Fahim Samiul Islam** হলেন UYFSR-এর **Deputy Chief Executive Officer (DCEO)**। তিনি জাতীয় কার্যক্রমের তত্ত্বাবধান ও এক্সেকিউটিভ কাউন্সিল পরিচালনায় সহযোগিতা করেন।',
-        '💼 **Fahim Samiul Islam** serves as the **Deputy Chief Executive Officer (DCEO)** of UYFSR, co-directing organizational governance, program execution, and institutional alliances.',
-        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership' }
+        '💼 **ফাহিম সামিউল ইসলাম (Fahim Samiul Islam)**\n\n' +
+        '• **পদবি:** উপ-প্রধান নির্বাহী কর্মকর্তা (Deputy Chief Executive Officer - DCEO)\n' +
+        '• **বিভাগ:** Executive Directorate & Program Operations\n' +
+        '• **মোবাইল:** `+880 1303-290971`\n' +
+        '• **ইমেইল:** `samiulislamfahim8@gmail.com`\n' +
+        '• **ফেসবুক:** [Facebook Profile](https://www.facebook.com/fahimsamiul.Islam.568/)\n' +
+        '• **দায়িত্ব:** সংগঠনের নির্বাহী পরিচালনা, দেশব্যাপী যুব বিজ্ঞান কর্মসূচি সমন্বয় ও শীর্ষ নেতৃত্বে কৌশলগত সহযোগিতা করেন।',
+
+        '💼 **Fahim Samiul Islam (Deputy Chief Executive Officer - DCEO):**\n\n' +
+        '• Mobile: +880 1303-290971\n' +
+        '• Email: samiulislamfahim8@gmail.com\n' +
+        '• Facebook: https://www.facebook.com/fahimsamiul.Islam.568/',
+
+        '💼 **Fahim Samiul Islam — Deputy Chief Executive Officer (DCEO):**\n\n' +
+        '• **Phone:** `+880 1303-290971`\n' +
+        '• **Email:** `samiulislamfahim8@gmail.com`\n' +
+        '• **Facebook:** [Profile Link](https://www.facebook.com/fahimsamiul.Islam.568/)',
+        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership', leaderName: 'Fahim Samiul Islam' }
       )
     }
 
     case 'LEADERSHIP_SOYAIB': {
       return pack(
-        '🔬 **শোয়াইব ইসলাম (Soyaib Islam)** UYFSR-এর **চিফ রিসার্চ অফিসার (Chief Research Officer - CRO)**। তিনি তরুণদের বৈজ্ঞানিক প্রকাশনা, গবেষণার রূপরেখা ও সায়েন্টিফিক ক্লিনিক তদারকি করেন।',
-        '🔬 **Soyaib Islam** হলেন UYFSR-এর **Chief Research Officer (CRO)**। তিনি তরুণদের রিসার্চ মেথডোলজি, জার্নাল ও একাডেমিক কারিকুলাম তত্ত্বাবধান করেন।',
-        '🔬 **Soyaib Islam** serves as the **Chief Research Officer (CRO)** of UYFSR, supervising youth research frameworks, academic publications, and scientific investigative clinics.',
-        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership' }
+        '🔬 **শোয়াইব ইসলাম (Soyaib Islam)**\n\n' +
+        '• **পদবি:** প্রধান গবেষণা কর্মকর্তা (Chief Research Officer - CRO)\n' +
+        '• **বিভাগ:** Research Strategy & Scientific Development\n' +
+        '• **মোবাইল:** `+880 1349-359808`\n' +
+        '• **ইমেইল:** `soyaib248@gmail.com`\n' +
+        '• **ফেসবুক:** [Facebook Profile](https://www.facebook.com/share/1DTfy9EwFd/)\n' +
+        '• **দায়িত্ব:** তরুণদের গবেষণা পদ্ধতি, সায়েন্টিফিক জার্নাল ও পেপার প্রকাশনা, রিসার্চ ক্লিনিক এবং অ্যাকাডেমিক কারিকুলাম তত্ত্বাবধান করেন।',
+
+        '🔬 **Soyaib Islam (Chief Research Officer - CRO):**\n\n' +
+        '• Mobile: +880 1349-359808\n' +
+        '• Email: soyaib248@gmail.com\n' +
+        '• Facebook: https://www.facebook.com/share/1DTfy9EwFd/',
+
+        '🔬 **Soyaib Islam — Chief Research Officer (CRO):**\n\n' +
+        '• **Phone:** `+880 1349-359808`\n' +
+        '• **Email:** `soyaib248@gmail.com`\n' +
+        '• **Facebook:** [Profile Link](https://www.facebook.com/share/1DTfy9EwFd/)',
+        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership', leaderName: 'Soyaib Islam' }
       )
     }
 
     case 'LEADERSHIP_MEJBA': {
       return pack(
-        '⚙️ **শাহরিয়ার মেজবা (Shahriar Mejba)** UYFSR-এর **চিফ অপারেটিং অফিসার (Chief Operating Officer - COO)**। তিনি মাঠপর্যায়ের কার্যক্রম, লজিস্টিকস ও অলিম্পিয়াডের সফল বাস্তবায়নে নিয়োজিত।',
-        '⚙️ **Shahriar Mejba** হলেন UYFSR-এর **Chief Operating Officer (COO)**। তিনি জাতীয় অনুষ্ঠানগুলোর অপারেশনস, ফিল্ড চ্যাপ্টার এবং লজিস্টিকস পরিচালনা করেন।',
-        '⚙️ **Shahriar Mejba** is the **Chief Operating Officer (COO)** of UYFSR, directing operational workflows, event logistics, and nationwide chapter coordination.',
-        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership' }
+        '⚙️ **শাহরিয়ার মেজবা (Shahriar Mejba)**\n\n' +
+        '• **পদবি:** প্রধান পরিচালনা কর্মকর্তা (Chief Operating Officer - COO)\n' +
+        '• **বিভাগ:** Operations & Council Governance\n' +
+        '• **মোবাইল:** `+880 1410-581821`\n' +
+        '• **ইমেইল:** `mejbaacps2007@gmail.com`\n' +
+        '• **ফেসবুক:** [Facebook Profile](https://www.facebook.com/share/1E5uVz1e3v/)\n' +
+        '• **ভাউচার কোড:** `UYFSR-REF-SM2026` (রেজিস্ট্রেশন ফিতে ২০% ছাড়)\n' +
+        '• **দায়িত্ব:** সাংগঠনিক পরিচালনা, অপারেশনাল ওয়ার্কফ্লো, জাতীয় ইভেন্ট বাস্তবায়ন, ফিল্ড চ্যাপ্টার সমন্বয় ও লজিস্টিকস পরিচালনা করেন।',
+
+        '⚙️ **Shahriar Mejba (Chief Operating Officer - COO):**\n\n' +
+        '• Mobile: +880 1410-581821\n' +
+        '• Email: mejbaacps2007@gmail.com\n' +
+        '• Facebook: https://www.facebook.com/share/1E5uVz1e3v/\n' +
+        '• Voucher: UYFSR-REF-SM2026 (20% off)',
+
+        '⚙️ **Shahriar Mejba — Chief Operating Officer (COO):**\n\n' +
+        '• **Phone:** `+880 1410-581821`\n' +
+        '• **Email:** `mejbaacps2007@gmail.com`\n' +
+        '• **Facebook:** [Profile Link](https://www.facebook.com/share/1E5uVz1e3v/)\n' +
+        '• **Voucher:** `UYFSR-REF-SM2026`',
+        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership', leaderName: 'Shahriar Mejba' }
       )
     }
 
     case 'LEADERSHIP_DALIA': {
       return pack(
-        '📢 **ডালিয়া সুলতানা জোতি (Dalia Sultana Joty)** UYFSR-এর **চিফ কমিউনিকেশন্স অফিসার (Chief Communications Officer - CCO)**। তিনি কৌশলগত যোগাযোগ, মিডিয়া রিলেশনস ও বহির্বিশ্বে সাংগঠনিক প্রচার পরিচালনা করেন।',
-        '📢 **Dalia Sultana Joty** হলেন UYFSR-এর **Chief Communications Officer (CCO)**। তিনি সাংগঠনিক কমিউনিকেশন্স, মিডিয়া নেটওয়ার্ক ও জনসংযোগ পরিচালনা করেন।',
-        '📢 **Dalia Sultana Joty** serves as the **Chief Communications Officer (CCO)** of UYFSR, directing strategic communications, public relations, and institutional media engagement.',
-        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership' }
+        '📢 **ডালিয়া সুলতানা জ্যোতি (Dalia Sultana Joty)**\n\n' +
+        '• **পদবি:** প্রধান যোগাযোগ কর্মকর্তা (Chief Communications Officer - CCO)\n' +
+        '• **বিভাগ:** Communications & External Affairs\n' +
+        '• **মোবাইল:** `+880 1333-623162`\n' +
+        '• **ইমেইল:** `daliajoty@gmail.com`\n' +
+        '• **ফেসবুক:** [Facebook Profile](https://www.facebook.com/dalia.joty)\n' +
+        '• **দায়িত্ব:** সাংগঠনিক বহির্যোগাযোগ, মিডিয়া সম্পর্ক, প্রাতিষ্ঠানিক প্রেস রিলিজ এবং জাতীয় যুব গবেষণা প্রচার পরিচালনা করছেন।',
+
+        '📢 **Dalia Sultana Joty (Chief Communications Officer - CCO):**\n\n' +
+        '• Mobile: +880 1333-623162\n' +
+        '• Email: daliajoty@gmail.com\n' +
+        '• Facebook: https://www.facebook.com/dalia.joty',
+
+        '📢 **Dalia Sultana Joty — Chief Communications Officer (CCO):**\n\n' +
+        '• **Phone:** `+880 1333-623162`\n' +
+        '• **Email:** `daliajoty@gmail.com`\n' +
+        '• **Facebook:** [Profile Link](https://www.facebook.com/dalia.joty)',
+        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership', leaderName: 'Dalia Sultana Joty' }
       )
     }
 
     case 'LEADERSHIP_JARIN': {
       return pack(
-        '📋 **জারিন তাসনিম (Jarin Tasnim)** UYFSR-এর **চিফ ম্যানেজমেন্ট অফিসার (Chief Management Officer - CMO)**। তিনি ম্যানেজমেন্ট অপারেশনস, ইভেন্ট পরিচালনা ও পাবলিক রিলেশনস দেখাশোনা করেন।',
-        '📋 **Jarin Tasnim** হলেন UYFSR-এর **Chief Management Officer (CMO)**। তিনি প্রাতিষ্ঠানিক যোগাযোগ, ইভেন্ট ব্যবস্থাপনা ও জনসংযোগ পরিচালনা করেন।',
-        '📋 **Jarin Tasnim** is a **Chief Management Officer (CMO)** at UYFSR, managing institutional workflows, event logistics, and public communications.',
-        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership' }
+        '📋 **জারিন তাসনিম (Jarin Tasnim)**\n\n' +
+        '• **পদবি:** প্রধান ব্যবস্থাপনা কর্মকর্তা (Chief Management Officer - CMO)\n' +
+        '• **বিভাগ:** Management Operations & Public Affairs\n' +
+        '• **মোবাইল:** `+880 1333-623162`\n' +
+        '• **ইমেইল:** `parkjarinot7@gmail.com`\n' +
+        '• **ফেসবুক:** [Facebook Profile](https://www.facebook.com/share/1Hs9Ffvgxd/)\n' +
+        '• **দায়িত্ব:** সাংগঠনিক ম্যানেজমেন্ট ওয়ার্কফ্লো, আন্তঃপ্রাতিষ্ঠানিক যোগাযোগ, ইভেন্ট পরিচালনা ও জনসংযোগ দেখাশোনা করেন।',
+
+        '📋 **Jarin Tasnim (Chief Management Officer - CMO):**\n\n' +
+        '• Mobile: +880 1333-623162\n' +
+        '• Email: parkjarinot7@gmail.com\n' +
+        '• Facebook: https://www.facebook.com/share/1Hs9Ffvgxd/',
+
+        '📋 **Jarin Tasnim — Chief Management Officer (CMO):**\n\n' +
+        '• **Phone:** `+880 1333-623162`\n' +
+        '• **Email:** `parkjarinot7@gmail.com`\n' +
+        '• **Facebook:** [Profile Link](https://www.facebook.com/share/1Hs9Ffvgxd/)',
+        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership', leaderName: 'Jarin Tasnim' }
       )
     }
 
     case 'LEADERSHIP_NABIL': {
       return pack(
-        '🤝 **মো. নাবিল তাহমিদ (Md Nabil Tahmid)** UYFSR-এর **চিফ হিউম্যান রিসোর্সেস অফিসার (Chief Human Resources Officer - CHRO)**। তিনি মানবসম্পদ ব্যবস্থাপনা, সদস্য নিয়োগ ও কর্মী উন্নয়ন পরিচালনা করেন।',
-        '🤝 **Md Nabil Tahmid** হলেন UYFSR-এর **Chief Human Resources Officer (CHRO)**। তিনি টিম ডেভেলপমেন্ট, মেম্বার রিক্রুটমেন্ট ও এইচআর অপারেশন্স তদারকি করেন।',
-        '🤝 **Md Nabil Tahmid** serves as the **Chief Human Resources Officer (CHRO)** of UYFSR, leading talent acquisition, organizational culture, and human resources governance.',
-        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership' }
+        '🤝 **মো: নাবিল তাহমিদ (Md Nabil Tahmid)**\n\n' +
+        '• **পদবি:** প্রধান মানবসম্পদ কর্মকর্তা (Chief Human Resources Officer - CHRO)\n' +
+        '• **বিভাগ:** Human Resources & Talent Development\n' +
+        '• **মোবাইল:** `+880 1617-607048`\n' +
+        '• **ইমেইল:** `hassantahmid312@gmail.com`\n' +
+        '• **ফেসবুক:** [Facebook Profile](https://www.facebook.com/share/1E6jW8D1Vd/)\n' +
+        '• **দায়িত্ব:** মানবসম্পদ ব্যবস্থাপনা, নেতৃত্ব উন্নয়ন, দেশব্যাপী নতুন সদস্য ও ভলান্টিয়ার নিয়োগ এবং কমিউনিটি কল্যাণ পরিচালনা করেন।',
+
+        '🤝 **Md Nabil Tahmid (Chief Human Resources Officer - CHRO):**\n\n' +
+        '• Mobile: +880 1617-607048\n' +
+        '• Email: hassantahmid312@gmail.com\n' +
+        '• Facebook: https://www.facebook.com/share/1E6jW8D1Vd/',
+
+        '🤝 **Md Nabil Tahmid — Chief Human Resources Officer (CHRO):**\n\n' +
+        '• **Phone:** `+880 1617-607048`\n' +
+        '• **Email:** `hassantahmid312@gmail.com`\n' +
+        '• **Facebook:** [Profile Link](https://www.facebook.com/share/1E6jW8D1Vd/)',
+        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership', leaderName: 'Md Nabil Tahmid' }
       )
     }
 
     case 'LEADERSHIP_TASHKIR': {
       return pack(
-        '💻 **শাহরিয়ার তাসকির (Shahriyar Tashkir)** UYFSR-এর **চিফ টেকনোলজি অফিসার (Chief Technology Officer - CTO)**। তিনি ডিজিটাল সিস্টেম, সফটওয়্যার প্ল্যাটফর্ম ও আইটি অবকাঠামো পরিচালনা করেন।',
-        '💻 **Shahriyar Tashkir** হলেন UYFSR-এর **Chief Technology Officer (CTO)**। তিনি প্ল্যাটফর্ম আর্কিটেকচার, ওয়েবসাইট ও টেকনিক্যাল সিস্টেম নিয়ন্ত্রণ করেন।',
-        '💻 **Shahriyar Tashkir** is the **Chief Technology Officer (CTO)** of UYFSR, stewarding digital infrastructure and scientific software portals.',
-        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership' }
+        '💻 **শাহরিয়ার তাসকির (Shahriyar Tashkir)**\n\n' +
+        '• **পদবি:** প্রধান প্রযুক্তি কর্মকর্তা (Chief Technology Officer - CTO)\n' +
+        '• **বিভাগ:** Technology & Digital Infrastructure\n' +
+        '• **মোবাইল:** `+880 1349-359808`\n' +
+        '• **ইমেইল:** `tashkir2006@gmail.com`\n' +
+        '• **ফেসবুক:** [Facebook Profile](https://www.facebook.com/share/1b6Xuh2wGZ/)\n' +
+        '• **দায়িত্ব:** ডিজিটাল সিস্টেম আর্কিটেকচার, প্ল্যাটফর্ম ইঞ্জিনিয়ারিং, কেন্দ্রীয় পোর্টাল ও কম্পিউটেশনাল রিসার্চ টুলস পরিচালনা করেন।',
+
+        '💻 **Shahriyar Tashkir (Chief Technology Officer - CTO):**\n\n' +
+        '• Mobile: +880 1349-359808\n' +
+        '• Email: tashkir2006@gmail.com\n' +
+        '• Facebook: https://www.facebook.com/share/1b6Xuh2wGZ/',
+
+        '💻 **Shahriyar Tashkir — Chief Technology Officer (CTO):**\n\n' +
+        '• **Phone:** `+880 1349-359808`\n' +
+        '• **Email:** `tashkir2006@gmail.com`\n' +
+        '• **Facebook:** [Profile Link](https://www.facebook.com/share/1b6Xuh2wGZ/)',
+        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership', leaderName: 'Shahriyar Tashkir' }
       )
     }
 
     case 'LEADERSHIP_TAKI': {
       return pack(
-        '⚡ **তাকী আল জাকী (Taki Al Zaki)** হলেন UYFSR-এর **সেক্রেটারি অব টেকনোলজি (Secretary of Technology)**। তিনি ডিজিটাল অপারেশনস এবং ওয়েব প্ল্যাটফর্ম পরিচালনায় সহায়তা করেন।',
-        '⚡ **Taki Al Zaki** হলেন UYFSR-এর **Secretary of Technology**। তিনি ওয়েব সিস্টেম ও প্রযুক্তিগত কার্যক্রম তদারকি করেন।',
-        '⚡ **Taki Al Zaki** is the **Secretary of Technology** of UYFSR, overseeing web engineering and systems execution.',
-        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership' }
+        '⚡ **তাকি আল জাকি (Taki Al Zaki)**\n\n' +
+        '• **পদবি:** তথ্যপ্রযুক্তি সচিব (Secretary of Technology)\n' +
+        '• **বিভাগ:** Technology & Digital Systems (Secretariat)\n' +
+        '• **মোবাইল:** `+880 1911-287501`\n' +
+        '• **ইমেইল:** `ktahan629@gmail.com`\n' +
+        '• **ফেসবুক:** [Facebook Page](https://www.facebook.com/uyfsr)\n' +
+        '• **দায়িত্ব:** কেন্দ্রীয় ওয়েব প্ল্যাটফর্ম ডেভেলপমেন্ট, ডিজিটাল সিস্টেম ইন্টিগ্রেশন এবং গবেষণা ও ইভেন্ট সংক্রান্ত প্রযুক্তিগত অপারেশনস তদারকি করেন।',
+
+        '⚡ **Taki Al Zaki (Secretary of Technology):**\n\n' +
+        '• Mobile: +880 1911-287501\n' +
+        '• Email: ktahan629@gmail.com\n' +
+        '• Facebook: https://www.facebook.com/uyfsr',
+
+        '⚡ **Taki Al Zaki — Secretary of Technology:**\n\n' +
+        '• **Phone:** `+880 1911-287501`\n' +
+        '• **Email:** `ktahan629@gmail.com`\n' +
+        '• **Facebook:** [Page Link](https://www.facebook.com/uyfsr)',
+        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership', leaderName: 'Taki Al Zaki' }
       )
     }
 
     case 'LEADERSHIP_ROHAN': {
       return pack(
-        '🏛️ **খালেদ সাইফুল্লাহ রোহান (Khaled Saifullah Rohan)** হলেন UYFSR-এর সম্মানিত **উপদেষ্টা (Adviser)**। তিনি প্রাতিষ্ঠানিক নীতিমালা ও স্ট্র্যাটেজিক পরামর্শ প্রদান করেন।',
-        '🏛️ **Khaled Saifullah Rohan** হলেন UYFSR-এর **Adviser**। তিনি সংগঠনের নীতিগত দিক ও স্ট্র্যাটেজিতে পরামর্শ দেন।',
-        '🏛️ **Khaled Saifullah Rohan** serves as an **Adviser** to UYFSR, providing strategic guidance and institutional governance.',
-        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership' }
+        '🏛️ **খালেদ সাইফুল্লাহ রোহান (Khaled Saifullah Rohan)**\n\n' +
+        '• **পদবি:** সম্মানিত উপদেষ্টা (Adviser)\n' +
+        '• **বিভাগ:** Advisory Board & Strategic Guidance\n' +
+        '• **মোবাইল:** `+880 1736-309347`\n' +
+        '• **ইমেইল:** `rohan232619@gmail.com`\n' +
+        '• **ফেসবুক:** [Facebook Profile](https://www.facebook.com/share/1FGbriwzQb/)\n' +
+        '• **দায়িত্ব:** সংগঠনের প্রাতিষ্ঠানিক সুশাসন, স্ট্র্যাটেজিক পরামর্শ, পলিসি মেন্টরশিপ এবং জাতীয় যুব বিজ্ঞান কর্মসূচিতে দিকনির্দেশনা প্রদান করেন।',
+
+        '🏛️ **Khaled Saifullah Rohan (Adviser):**\n\n' +
+        '• Mobile: +880 1736-309347\n' +
+        '• Email: rohan232619@gmail.com\n' +
+        '• Facebook: https://www.facebook.com/share/1FGbriwzQb/',
+
+        '🏛️ **Khaled Saifullah Rohan — Adviser:**\n\n' +
+        '• **Phone:** `+880 1736-309347`\n' +
+        '• **Email:** `rohan232619@gmail.com`\n' +
+        '• **Facebook:** [Profile Link](https://www.facebook.com/share/1FGbriwzQb/)',
+        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership', leaderName: 'Khaled Saifullah Rohan' }
       )
     }
 
     case 'LEADERSHIP_RAFIN': {
       return pack(
-        '🏛️ **ওয়াসিমুল রাফিন (Oasimul Rafin)** হলেন UYFSR-এর সম্মানিত **উপদেষ্টা (Adviser)**। তিনি প্রাতিষ্ঠানিক গবেষণা, যুব বিজ্ঞান উদ্যোগ ও একাডেমিক পরামর্শ প্রদান করেন।',
-        '🏛️ **Oasimul Rafin** হলেন UYFSR-এর **Adviser**। তিনি গবেষণা কর্মসূচি ও যুব সংগঠনের পরামর্শক হিসেবে দায়িত্ব পালন করছেন।',
-        '🏛️ **Oasimul Rafin** serves as an **Adviser** to UYFSR, providing academic oversight and strategic advisory for youth science exploration.',
-        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership' }
+        '🏛️ **ওয়াসিমুল রাফিন (Oasimul Rafin)**\n\n' +
+        '• **পদবি:** সম্মানিত উপদেষ্টা (Adviser)\n' +
+        '• **বিভাগ:** Advisory Board & Academic Oversight\n' +
+        '• **মোবাইল:** `+880 1855-052383`\n' +
+        '• **ইমেইল:** `Oasimulrafin@gmail.com`\n' +
+        '• **ফেসবুক:** [Facebook Profile](https://www.facebook.com/share/1CLvCsT3Ho/)\n' +
+        '• **দায়িত্ব:** প্রাতিষ্ঠানিক গবেষণা, যুব বিজ্ঞান উদ্যোগ ও একাডেমিক পরামর্শ ও নীতিগত সহায়তা প্রদান করছেন।',
+
+        '🏛️ **Oasimul Rafin (Adviser):**\n\n' +
+        '• Mobile: +880 1855-052383\n' +
+        '• Email: Oasimulrafin@gmail.com\n' +
+        '• Facebook: https://www.facebook.com/share/1CLvCsT3Ho/',
+
+        '🏛️ **Oasimul Rafin — Adviser:**\n\n' +
+        '• **Phone:** `+880 1855-052383`\n' +
+        '• **Email:** `Oasimulrafin@gmail.com`\n' +
+        '• **Facebook:** [Profile Link](https://www.facebook.com/share/1CLvCsT3Ho/)',
+        { label: 'View Profile', href: '#leadership', view: 'home', anchor: 'leadership', leaderName: 'Oasimul Rafin' }
       )
     }
 
@@ -1868,9 +2085,37 @@ export function generateElibooResponse(
     // -------------------------------------------------------------------------
     case 'PARTNERS': {
       return pack(
-        '🤝 **UYFSR-এর সহযোগী প্রতিষ্ঠান ও পার্টনারসমূহ:**\n\n• **TWIMBOL** — ওয়ার্কশপ ও প্রোগ্রাম পার্টনার\n• **KIDLON** — ভেন্যু ও প্রেজেন্টিং পার্টনার\n• **MEJOLOGY** — শিক্ষা ও একাডেমিক কনটেন্ট পার্টনার\n• **ASTROSPHERE** — অ্যাস্ট্রোনমি ও অলিম্পিয়াড কো-অর্গানাইজার\n• **Media Consortium:** Motion BD, The Bayline Journal, TezzFeed\n• **অন্যান্য:** Aurelix (Fragrance), The Focal Vibe (Creative), The Yeasirians (Gift Partner)।',
-        '🤝 **UYFSR যাদের সাথে যৌথভাবে কাজ করছে:**\n\n• **TWIMBOL** — Workshop Partner\n• **KIDLON** — Venue & Presenting Partner\n• **MEJOLOGY** — Education Partner\n• **ASTROSPHERE** — Astronomy Co-organizer\n• **Media Partners:** Motion BD, The Bayline Journal, TezzFeed\n• **Creative & Gift Partners:** The Focal Vibe, Aurelix, The Yeasirians।',
-        '🤝 **UYFSR Collaborators and Institutional Partners:**\n\n• **TWIMBOL** — Program & Workshop Partner\n• **KIDLON** — Venue & Presenting Partner\n• **MEJOLOGY** — Academic Education Partner\n• **ASTROSPHERE** — Astronomy & Co-organizer\n• **Media Consortium:** Motion BD, The Bayline Journal, TezzFeed\n• **Specialized Partners:** Aurelix, The Focal Vibe, The Yeasirians.',
+        '🤝 **UYFSR-এর সহযোগী প্রতিষ্ঠান ও পার্টনারদের বিস্তারিত তালিকা:**\n\n' +
+        '• **TWIMBOL:** প্রোগ্রাম ও ওয়ার্কশপ পার্টনার (Junior Startup Challenge ও Junior Talent Award-এর যৌথ আয়োজক)\n' +
+        '• **KIDLON:** ভেন্যু ও প্রেজেন্টিং পার্টনার (Junior Talent Award Season 1-এর মূল স্টেজ)\n' +
+        '• **MEJOLOGY:** অ্যাকাডেমিক কনটেন্ট ও সায়েন্স কারিকুলাম পার্টনার\n' +
+        '• **ASTROSPHERE:** অলিম্পিয়াড ও মহাকাশ বিজ্ঞান কো-অর্গানাইজার\n' +
+        '• **The Bayline Journal:** এডিটোরিয়াল মিডিয়া পার্টনার\n' +
+        '• **Motion BD:** ব্রডকাস্ট মিডিয়া পার্টনার (ভিডিও ও ডকুমেন্টারি)\n' +
+        '• **TezzFeed:** ডিজিটাল মিডিয়া পার্টনার (সোশ্যাল মিডিয়া প্রচার)\n' +
+        '• **Adamjee School News Network & Communication Club:** ১ম জাতীয় জার্নালিজম কার্নিভাল ২০২৫-এর হোস্ট\n' +
+        '• **Learning and Study Organization:** অ্যাকাডেমিক স্টাডি মেটেরিয়াল কো-অর্গানাইজার\n' +
+        '• **The Focal Vibe:** ক্রিয়েটিভ ডিরেকশন ও স্টেজক্রাফট পার্টনার\n' +
+        '• **The Yeasirians:** মার্চেন্ডাইজ ও গিফট পার্টনার (ক্রেস্ট ও মেডেল)\n' +
+        '• **Aurelix:** অফিসিয়াল ইভেন্ট ফ্র্যাগ্রেন্স পার্টনার।',
+
+        '🤝 **UYFSR Official Partners Roster:**\n\n' +
+        '• **TWIMBOL:** Workshop & Program Partner\n' +
+        '• **KIDLON:** Venue & Presenting Partner\n' +
+        '• **MEJOLOGY:** Academic Content Partner\n' +
+        '• **ASTROSPHERE:** Astronomy Olympiad Partner\n' +
+        '• **Media Partners:** Motion BD, The Bayline Journal, TezzFeed\n' +
+        '• **Campus Partner:** Adamjee School News Network & Communication Club\n' +
+        '• **Creative & Gifts:** The Focal Vibe, The Yeasirians, Aurelix (Fragrance).',
+
+        '🤝 **UYFSR Institutional Partners Portfolio:**\n\n' +
+        '• **TWIMBOL:** Program & Workshop Partner (Co-organizer of Junior Startup Challenge & Junior Talent Award)\n' +
+        '• **KIDLON:** Venue & Presenting Partner (Junior Talent Award Season 1)\n' +
+        '• **MEJOLOGY:** Academic Content & Secondary Research Curriculum Partner\n' +
+        '• **ASTROSPHERE:** Astronomy & Space Olympiad Co-organizer\n' +
+        '• **Media Consortium:** Motion BD (Broadcast), The Bayline Journal (Editorial), TezzFeed (Digital)\n' +
+        '• **Campus Club Partner:** Adamjee School News Network & Communication Club (1st Journalism Carnival 2025)\n' +
+        '• **Affiliates:** Learning and Study Organization, The Focal Vibe (Creative), The Yeasirians (Gifts), Aurelix (Event Fragrance).',
         { label: 'Explore Partners Marquee', href: '#partners', view: 'home', anchor: 'partners' }
       )
     }
@@ -1880,9 +2125,29 @@ export function generateElibooResponse(
     // -------------------------------------------------------------------------
     case 'CONTACT': {
       return pack(
-        '📬 **UYFSR কেন্দ্রীয় সচিবালয়ের সাথে যোগাযোগ:**\n\n• 📧 **অফিসিয়াল ইমেইল:** `uyfsr.org@gmail.com`\n• 🏢 **কেন্দ্রীয় সচিবালয়:** ঢাকা, বাংলাদেশ\n• 🌐 অথবা আমাদের ওয়েবসাইটের ফুটারের ফর্ম পূরণ করে সরাসরি বার্তা পাঠাতে পারেন। আমাদের প্রতিনিধি দ্রুত যোগাযোগ করবেন!',
-        '📬 **যোগাযোগ করার মাধ্যম:**\n\n• 📧 **Official Email:** `uyfsr.org@gmail.com`\n• 🏢 **Central Secretariat:** Dhaka, Bangladesh\n• 💬 এছাড়া ওয়েবসাইটের নিচে থাকা কন্টাক্ট ফর্মে আপনার বার্তা লিখে পাঠাতে পারেন!',
-        '📬 **Contact the UYFSR Central Secretariat:**\n\n• 📧 **Official Email:** `uyfsr.org@gmail.com`\n• 🏢 **Central Secretariat:** Dhaka, Bangladesh\n• 💬 You can also submit an inquiry directly via the footer contact form.',
+        '📬 **UYFSR কেন্দ্রীয় সচিবালয়ের অফিসিয়াল যোগাযোগ মাধ্যম:**\n\n' +
+        '• 📧 **কেন্দ্রীয় ইমেইল:** `uyfsr.org@gmail.com`\n' +
+        '• 📱 **অফিসিয়াল বিকাশ / হেল্পলাইন নম্বর:** `01911287501`\n' +
+        '• 👔 **সিইও সরাসরি যোগাযোগ:** `+880 1824-798147` (মোস্তাফিজ বিন জিহাদ)\n' +
+        '• 🌐 **ফেসবুক পেজ:** [facebook.com/uyfsr](https://www.facebook.com/uyfsr)\n' +
+        '• 🏢 **কেন্দ্রীয় সচিবালয়:** ঢাকা, বাংলাদেশ (সমগ্র ৬৪ জেলায় কার্যক্রম পরিচালিত)\n' +
+        '• 💬 এছাড়া ওয়েবসাইটের ফুটারের ফর্ম পূরণ করে যেকোনো প্রশ্ন সরাসরি পাঠাতে পারেন!',
+
+        '📬 **UYFSR Central Secretariat Contact:**\n\n' +
+        '• 📧 Email: `uyfsr.org@gmail.com`\n' +
+        '• 📱 Official Helpline / bKash: `01911287501`\n' +
+        '• 👔 CEO Contact: `+880 1824-798147`\n' +
+        '• 🌐 Facebook: https://www.facebook.com/uyfsr\n' +
+        '• 🏢 Location: Dhaka, Bangladesh.\n' +
+        'Website footer er form puron koreo amader message dite paren!',
+
+        '📬 **Contact the UYFSR Central Secretariat:**\n\n' +
+        '• 📧 **Central Email:** `uyfsr.org@gmail.com`\n' +
+        '• 📱 **Official Helpline & Remittance:** `01911287501`\n' +
+        '• 👔 **CEO Direct Inquiries:** `+880 1824-798147` (Mustafiz Bin Jihad)\n' +
+        '• 🌐 **Facebook Page:** [facebook.com/uyfsr](https://www.facebook.com/uyfsr)\n' +
+        '• 🏢 **Headquarters:** Dhaka, Bangladesh (Operations spanning all 64 districts)\n' +
+        '• 💬 Direct messaging also available via the footer inquiry portal.',
         { label: 'Go to Contact Form', href: '#contact', view: 'home', anchor: 'contact' }
       )
     }
@@ -1892,9 +2157,19 @@ export function generateElibooResponse(
     // -------------------------------------------------------------------------
     case 'EXECUTIVE_LOGIN': {
       return pack(
-        '🔐 **UYFSR এক্সিকিউটিভ পোর্টাল:**\n\nকাউন্সিল সদস্য এবং নিযুক্ত কর্মকর্তারা তাদের প্রাতিষ্ঠানিক ইমেইল, নির্ধারিত পিন (PIN) এবং পাসওয়ার্ড ব্যবহার করে অভ্যন্তরীণ এক্সিকিউটিভ ড্যাশবোর্ডে লগইন করতে পারেন।',
-        '🔐 **Executive Portal:**\n\nUYFSR কাউন্সিল মেম্বার ও নিযুক্ত কর্মকর্তারা অফিশিয়াল ইমেইল, অ্যাসাইনড পিন এবং সিকিউর পাসওয়ার্ড দিয়ে তাদের ম্যানেজমেন্ট ড্যাশবোর্ডে প্রবেশ করতে পারবেন।',
-        '🔐 **UYFSR Executive Portal:**\n\nAppointed council members and officials can access the internal management dashboard using their official email, assigned PIN, and secure password.',
+        '🔐 **UYFSR এক্সিকিউটিভ পোর্টাল ও সিকিউরিটি ড্যাশবোর্ড:**\n\n' +
+        'কাউন্সিল সদস্য, উপদেষ্টা ও সচিবগণ প্রাতিষ্ঠানিক ইমেইল এবং সিকিউর পাসওয়ার্ড দিয়ে ড্যাশবোর্ডে প্রবেশ করতে পারেন।\n\n' +
+        '• **ড্যাশবোর্ডের কাজ:** রেজিষ্ট্রেশন পর্যবেক্ষণ, ক্যাম্পাস অ্যাম্বাসেডরদের অনুমোদন ও ই-আইডি ইস্যু, রেফারেল ভাউচার তৈরি এবং কাউন্সিল সভা নির্ধারণ।\n' +
+        '• **পাসওয়ার্ড ভুলে গেলে:** লগইন পেজের "Forgot Password" লিংকে ক্লিক করলে আপনার রেজিস্টার্ড ইমেইলে সিকিউর ওটিপি কোড চলে যাবে।',
+
+        '🔐 **UYFSR Executive Portal:**\n\n' +
+        'Executive council members, advisors and secretariat official email o password diye login korte paren.\n' +
+        'Password bhule gele "Forgot Password" e click korle registered email e OTP jabe!',
+
+        '🔐 **UYFSR Executive Governance Dashboard:**\n\n' +
+        'Appointed council members, advisors, and secretariat officials access the portal with verified executive credentials.\n' +
+        '• Features: Live participant logs, ambassador verification, voucher issuance, council scheduling.\n' +
+        '• Password Recovery: Built-in SMTP email OTP reset for registered accounts.',
         { label: 'Open Executive Login', href: '#executive-login', view: 'executive-login' }
       )
     }
@@ -1904,9 +2179,21 @@ export function generateElibooResponse(
     // -------------------------------------------------------------------------
     case 'VOUCHER': {
       return pack(
-        '🎟️ **ভাউচার কোড ও ছাড়ের নিয়ম:**\n\nUYFSR ক্যাম্পাস অ্যাম্বাসেডর এবং এক্সিকিউটিভ সদস্যরা স্পেশাল রেফারেল ভাউচার কোড (যেমন: `UYFSR-REF-xxx`) পেয়ে থাকেন। রেজিস্ট্রেশন ফর্মে এই কোড ব্যবহার করলে তাৎক্ষণিকভাবে **২০% ফি ছাড়** পাওয়া যায়!',
-        '🎟️ **ভাউচার কোড সুবিধা:**\n\nক্যাম্পাস অ্যাম্বাসেডরদের দেওয়া বিশেষ কোড (যেমন: `UYFSR-REF-...`) রেজিস্ট্রেশন ফর্মে বসিয়ে Apply দিলেই সাথে সাথে **২০% ডিসকাউন্ট** কার্যকর হয়ে যায়!',
-        '🎟️ **Voucher Codes & Discounts:**\n\nCampus Ambassadors and council executives carry unique referral voucher codes (e.g., `UYFSR-REF-...`). Applying a valid code on the registration form instantly grants a **20% discount** on your registration fee!',
+        '🎟️ **UYFSR এক্সিকিউটিভ ভাউচার কোড ও ২০% ছাড়ের নিয়ম:**\n\n' +
+        'রেজিস্ট্রেশন ফিতে **২০% নিশ্চিত ছাড়** পেতে নিচের যেকোনো একটি অফিশিয়াল ভাউচার কোড ব্যবহার করতে পারেন:\n' +
+        '• `UYFSR-REF-MBJ2026` — রেফারেল: মোস্তাফিজ বিন জিহাদ (CEO)\n' +
+        '• `UYFSR-REF-SM2026` — রেফারেল: শাহরিয়ার মেজবা (COO)\n\n' +
+        '💡 রেজিস্ট্রেশন পেজের ২য় ধাপে Voucher Code ইনপুট দিয়ে "Apply" বাটনে ক্লিক করলেই ফি ২০% স্বয়ংক্রিয়ভাবে কমে যাবে!',
+
+        '🎟️ **Official Voucher Codes (20% Discount):**\n\n' +
+        '• `UYFSR-REF-MBJ2026` (CEO Mustafiz Bin Jihad)\n' +
+        '• `UYFSR-REF-SM2026` (COO Shahriar Mejba)\n\n' +
+        'Registration page e code ta bosiye Apply dilei instantly 20% discount paben!',
+
+        '🎟️ **Executive Referral Voucher Codes (Instant 20% Off):**\n\n' +
+        '• `UYFSR-REF-MBJ2026` (Mustafiz Bin Jihad, CEO)\n' +
+        '• `UYFSR-REF-SM2026` (Shahriar Mejba, COO)\n\n' +
+        'Enter either code in the voucher box during registration checkout to unlock your 20% reduction.',
         { label: 'Register with Voucher', href: '#register', view: 'register' }
       )
     }

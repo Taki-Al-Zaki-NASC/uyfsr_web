@@ -35,7 +35,12 @@ const faqs: FAQItem[] = [
   }
 ]
 
-export const FAQ: React.FC = () => {
+interface FAQProps {
+  faqsData?: FAQItem[]
+}
+
+export const FAQ: React.FC<FAQProps> = ({ faqsData }) => {
+  const activeFaqs = faqsData && faqsData.length > 0 ? faqsData : faqs
   const [openIdx, setOpenIdx] = useState<number | null>(0)
   const [selectedCat, setSelectedCat] = useState<string>('All')
 
@@ -46,7 +51,7 @@ export const FAQ: React.FC = () => {
     setOpenIdx(openIdx === idx ? null : idx)
   }
 
-  const filteredFaqs = faqs.filter(
+  const filteredFaqs = activeFaqs.filter(
     (f) => selectedCat === 'All' || f.category === selectedCat
   )
 

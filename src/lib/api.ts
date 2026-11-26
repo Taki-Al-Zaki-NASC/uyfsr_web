@@ -560,3 +560,208 @@ export async function apiApplyAmbassador(payload: {
     message: string
   }>
 }
+
+// 11. Executive Registration, Self-Service Profile Editing & CEO Approval
+export interface ExecutiveProfileData {
+  id: string
+  name: string
+  email?: string
+  phone?: string
+  dob?: string
+  photo?: string
+  facebookUrl?: string
+  rankTier: 'Executive Council' | 'Advisors' | 'Secretariat'
+  title: string
+  department: string
+  isCEO: boolean
+  ecardId: string
+  activeSince: string
+  bio: string
+  status?: 'active' | 'pending' | 'rejected'
+  appliedAt?: string
+}
+
+export async function apiRegisterExecutive(payload: {
+  name: string
+  email: string
+  phone: string
+  dob: string
+  title: string
+  department: string
+  bio: string
+  password: string
+  photo?: string
+  facebookUrl?: string
+  rankTier?: 'Executive Council' | 'Advisors' | 'Secretariat'
+}) {
+  const res = await fetch(`${BASE_URL}/auth/executive-register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Registration failed' }))
+    throw new Error(err.error || 'Failed to submit executive registration')
+  }
+  return res.json() as Promise<{ success: boolean; message: string; ecardId: string }>
+}
+
+export async function apiUpdateMyProfile(
+  payload: {
+    name?: string
+    email?: string
+    phone?: string
+    dob?: string
+    department?: string
+    bio?: string
+    photo?: string
+    facebookUrl?: string
+    newPassword?: string
+  },
+  officerName?: string
+) {
+  const res = await fetch(`${BASE_URL}/executives/me`, {
+    method: 'PUT',
+    headers: getAuthHeaders(officerName),
+    body: JSON.stringify(payload)
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Profile update failed' }))
+    throw new Error(err.error || 'Failed to update profile')
+  }
+  return res.json() as Promise<{ success: boolean; message: string; officer: ExecutiveProfileData }>
+}
+
+export async function apiGetPendingExecutives(officerName?: string) {
+  const res = await fetch(`${BASE_URL}/executives/pending`, {
+    headers: getAuthHeaders(officerName)
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Failed to load pending accounts' }))
+    throw new Error(err.error || 'Failed to load pending executives')
+  }
+  const data = await res.json()
+  return (data.pending || []) as ExecutiveProfileData[]
+}
+
+export async function apiApproveExecutive(
+  id: string,
+  options?: { title?: string; rankTier?: string },
+  officerName?: string
+) {
+  const res = await fetch(`${BASE_URL}/executives/${encodeURIComponent(id)}/approve`, {
+    method: 'POST',
+    headers: getAuthHeaders(officerName),
+    body: JSON.stringify(options || {})
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Approval failed' }))
+    throw new Error(err.error || 'Failed to approve executive account')
+  }
+  return res.json() as Promise<{ success: boolean; message: string; executive: ExecutiveProfileData }>
+}
+
+export async function apiRejectExecutive(id: string, officerName?: string) {
+  const res = await fetch(`${BASE_URL}/executives/${encodeURIComponent(id)}/reject`, {
+    method: 'POST',
+    headers: getAuthHeaders(officerName)
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Rejection failed' }))
+    throw new Error(err.error || 'Failed to decline executive registration')
+  }
+  return res.json() as Promise<{ success: boolean; message: string }>
+}
+
+// 12. Site Content CMS (Public Read / CEO-Only Publish)
+export interface SiteEventItem {
+  id: string
+  title: string
+  dateDisplay: {
+    days: string
+    monthYear: string
+    duration: string
+  }
+  category: string
+  uyfsrRole: string
+  organizer: string
+  detailsNote: string
+  description: string
+  status: 'Upcoming 2026' | 'Ongoing' | 'Scheduled' | 'Completed'
+}
+
+export interface SitePartnerItem {
+  id: string
+  name: string
+  role: string
+  description: string
+  logo: string
+  category: 'Strategic Alliances' | 'Media Consortium' | 'Club & Campus Partners' | 'Community & Affiliates'
+}
+
+export interface SiteFaqItem {
+  id: string
+  q: string
+  a: string
+  category: 'About UYFSR' | 'Olympiads & Fairs' | 'Participation & Research'
+}
+
+export interface SiteHeroData {
+  headline: string
+  leadText: string
+  foundationDate: string
+  foundationLabel: string
+  foundationSub: string
+  studentsTarget: number
+  studentsSuffix: string
+  studentsLabel: string
+  studentsSub: string
+  categoriesTarget: number
+  categoriesLabel: string
+  categoriesSub: string
+  alliancesTarget: number
+  alliancesLabel: string
+  alliancesSub: string
+}
+
+export interface SiteMissionVisionData {
+  missionTitle: string
+  missionText: string
+  visionTitle: string
+  visionText: string
+}
+
+export interface SiteContentData {
+  hero: SiteHeroData
+  missionVision: SiteMissionVisionData
+  events: SiteEventItem[]
+  partners: SitePartnerItem[]
+  faqs: SiteFaqItem[]
+}
+
+export async function apiGetSiteContent() {
+  const res = await fetch(`${BASE_URL}/site-content`)
+  if (!res.ok) throw new Error('Failed to fetch site content')
+  return res.json() as Promise<{ siteContent: SiteContentData; news: any[] }>
+}
+
+export async function apiUpdateSiteContent(
+  payload: Partial<SiteContentData> & { news?: any[] },
+  officerName?: string
+) {
+  const res = await fetch(`${BASE_URL}/site-content`, {
+    method: 'PUT',
+    headers: getAuthHeaders(officerName),
+    body: JSON.stringify(payload)
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Failed to publish site content' }))
+    throw new Error(err.error || 'Failed to update site content')
+  }
+  return res.json() as Promise<{
+    success: boolean
+    message: string
+    siteContent: SiteContentData
+    news: any[]
+  }>
+}

@@ -175,6 +175,7 @@ export const AboutUs: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState<number>(0)
   const [translateX, setTranslateX] = useState<number>(0)
   const [isPaused, setIsPaused] = useState<boolean>(false)
+  const [highlightedLeader, setHighlightedLeader] = useState<string | null>(null)
 
   const sectionRef = useRef<HTMLElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
@@ -183,6 +184,7 @@ export const AboutUs: React.FC = () => {
   const pauseTimerRef = useRef<number | null>(null)
   const touchStartX = useRef<number>(0)
   const touchStartY = useRef<number>(0)
+  const isFocusingRef = useRef<boolean>(false)
 
   const tiers = ['All', 'Executive Council', 'Advisors', 'Secretariat']
 
@@ -196,8 +198,12 @@ export const AboutUs: React.FC = () => {
     return matchesTier && matchesQuery
   })
 
-  // Keep currentIndex bounded when filter changes
+  // Keep currentIndex bounded when filter changes, unless focusing a specific leader
   useEffect(() => {
+    if (isFocusingRef.current) {
+      isFocusingRef.current = false
+      return
+    }
     setCurrentIndex(0)
   }, [selectedTier, query])
 
@@ -236,6 +242,79 @@ export const AboutUs: React.FC = () => {
       setIsPaused(false)
     }, 3500)
   }, [])
+
+  // Focus and spotlight a specific leader requested via Eliboo or navigation
+  const focusLeaderByName = useCallback((targetName: string) => {
+    if (!targetName) return
+
+    const normalizedTarget = targetName.toLowerCase().trim()
+    const targetLeader = leaders.find((l) =>
+      l.name.toLowerCase().includes(normalizedTarget) ||
+      normalizedTarget.includes(l.name.toLowerCase()) ||
+      normalizedTarget.split(' ').some((part) => part.length > 2 && l.name.toLowerCase().includes(part))
+    )
+
+    if (!targetLeader) return
+
+    // Prevent [selectedTier, query] effect from resetting currentIndex to 0
+    isFocusingRef.current = true
+
+    // Ensure tier is 'All' so targetLeader is included in filteredLeaders
+    setSelectedTier('All')
+    setQuery('')
+
+    const targetIdx = leaders.findIndex((l) => l.name === targetLeader.name)
+    if (targetIdx >= 0) {
+      setCurrentIndex(targetIdx)
+      triggerUserInteractionPause()
+      updateTrackPosition(targetIdx)
+    }
+
+    setHighlightedLeader(targetLeader.name)
+
+    // Scroll directly to the leader card
+    setTimeout(() => {
+      const cardId = `leader-card-${targetLeader.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+      const cardEl = document.getElementById(cardId)
+      if (cardEl) {
+        cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      } else if (sectionRef.current) {
+        sectionRef.current.scrollIntoView({ behavior: 'smooth' })
+      }
+    }, 150)
+
+    // Clear highlight after 7 seconds
+    setTimeout(() => {
+      setHighlightedLeader((prev) => (prev === targetLeader.name ? null : prev))
+    }, 7000)
+  }, [triggerUserInteractionPause, updateTrackPosition])
+
+  useEffect(() => {
+    const handleFocusLeader = (e: CustomEvent<{ name: string }>) => {
+      if (e.detail?.name) {
+        focusLeaderByName(e.detail.name)
+      }
+    }
+
+    window.addEventListener('uyfsr:focus-leader', handleFocusLeader as EventListener)
+
+    // Check for pending focus on mount / view switch
+    try {
+      const pendingFocus = sessionStorage.getItem('uyfsr_focus_leader')
+      if (pendingFocus) {
+        sessionStorage.removeItem('uyfsr_focus_leader')
+        setTimeout(() => {
+          focusLeaderByName(pendingFocus)
+        }, 220)
+      }
+    } catch {
+      // ignore
+    }
+
+    return () => {
+      window.removeEventListener('uyfsr:focus-leader', handleFocusLeader as EventListener)
+    }
+  }, [focusLeaderByName])
 
   // Auto-slide effect: smoothly advances every 3.2 seconds
   useEffect(() => {
@@ -467,21 +546,33 @@ export const AboutUs: React.FC = () => {
             >
               {filteredLeaders.map((leader, idx) => {
                 const isActive = idx === currentIndex
+                const isHighlighted = highlightedLeader === leader.name
                 const leaderIndexStr = String(idx + 1).padStart(2, '0')
                 const totalLeadersStr = String(filteredLeaders.length).padStart(2, '0')
+                const cardId = `leader-card-${leader.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
 
                 return (
                   <div
+                    id={cardId}
                     key={leader.name}
-                    className={`relative bg-[#ecece9] hover:bg-white p-4 sm:p-5 flex flex-col justify-between rounded-xs border transition-all duration-300 cursor-default shrink-0 select-text ${
-                      isActive
+                    className={`relative p-4 sm:p-5 flex flex-col justify-between rounded-xs border transition-all duration-300 cursor-default shrink-0 select-text ${
+                      isHighlighted
+                        ? 'border-[#0c7866] bg-white ring-4 ring-[#0c7866] shadow-[0_0_35px_rgba(12,120,102,0.45)] z-20 scale-[1.01]'
+                        : isActive
                         ? 'border-[#0c7866] bg-white shadow-xl ring-2 ring-[#0c7866]/30'
-                        : 'border-[#e2e2dc] hover:border-[#0c7866] shadow-2xs hover:shadow-lg'
+                        : 'border-[#e2e2dc] bg-[#ecece9] hover:bg-white hover:border-[#0c7866] shadow-2xs hover:shadow-lg'
                     }`}
                     style={{
                       width: 'min(82vw, 320px)'
                     }}
                   >
+                    {/* Top Floating Spotlight Badge */}
+                    {isHighlighted && (
+                      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-30 bg-[#0c7866] text-white text-[11px] font-bold px-3 py-0.5 rounded-full shadow-lg flex items-center gap-1.5 animate-bounce pointer-events-none whitespace-nowrap">
+                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                        <span>Focused Profile</span>
+                      </div>
+                    )}
                     {/* Top Green Accent Bar */}
                     <div
                       className={`absolute top-0 left-0 h-[3px] bg-[#0c7866] transition-all duration-500 ease-out z-20 ${
@@ -703,14 +794,33 @@ export const AboutUs: React.FC = () => {
            ====================================================================== */
         <div className="max-w-7xl mx-auto px-6 sm:px-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredLeaders.map((leader, idx) => (
-              <div
-                key={leader.name}
-                data-reveal
-                data-delay={`${(idx % 3) * 80}`}
-                className="group relative overflow-hidden bg-[#ecece9] hover:bg-white p-6 sm:p-7 flex flex-col justify-between rounded-xs border border-[#e2e2dc] hover:border-[#0c7866] shadow-2xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-out cursor-default"
-              >
-                <div className="absolute top-0 left-0 w-0 h-[3px] bg-[#0c7866] group-hover:w-full transition-all duration-500 ease-out" />
+            {filteredLeaders.map((leader, idx) => {
+              const isHighlighted = highlightedLeader === leader.name
+              const cardId = `leader-card-${leader.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+
+              return (
+                <div
+                  id={cardId}
+                  key={leader.name}
+                  data-reveal
+                  data-delay={`${(idx % 3) * 80}`}
+                  className={`group relative overflow-hidden p-6 sm:p-7 flex flex-col justify-between rounded-xs border transition-all duration-300 ease-out cursor-default ${
+                    isHighlighted
+                      ? 'border-[#0c7866] bg-white ring-4 ring-[#0c7866] shadow-[0_0_35px_rgba(12,120,102,0.45)] -translate-y-1 z-20'
+                      : 'bg-[#ecece9] hover:bg-white border-[#e2e2dc] hover:border-[#0c7866] shadow-2xs hover:shadow-xl hover:-translate-y-1'
+                  }`}
+                >
+                  {/* Top Floating Spotlight Badge */}
+                  {isHighlighted && (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-30 bg-[#0c7866] text-white text-[11px] font-bold px-3 py-0.5 rounded-full shadow-lg flex items-center gap-1.5 animate-bounce pointer-events-none whitespace-nowrap">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                      <span>Focused Profile</span>
+                    </div>
+                  )}
+
+                  <div className={`absolute top-0 left-0 h-[3px] bg-[#0c7866] transition-all duration-500 ease-out ${
+                    isHighlighted ? 'w-full' : 'w-0 group-hover:w-full'
+                  }`} />
 
                 <div>
                   <div className="relative w-full h-64 sm:h-72 overflow-hidden bg-[#f7f7f5] mb-5 rounded-xs shadow-inner">
@@ -774,7 +884,7 @@ export const AboutUs: React.FC = () => {
                   </span>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
       )}

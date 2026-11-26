@@ -147,7 +147,10 @@ const PROTECTED_INTERNAL_EMAILS = new Set([
 function checkSpamThrottle(to: string | string[], subject: string): { allow: boolean; reason?: string } {
   const recipients = Array.isArray(to) ? to : [to]
   const now = Date.now()
-  const isSecurityOtp = subject.includes('Passkey Reset Code') || subject.includes('Passkey Updated')
+  const isSecurityOtp =
+    subject.includes('Passkey Reset Code') ||
+    subject.includes('Passkey Updated') ||
+    subject.includes('Executive Account Approved')
 
   for (const rawRecipient of recipients) {
     const email = (rawRecipient || '').trim().toLowerCase()
@@ -1062,6 +1065,112 @@ Dhaka, Bangladesh · Science, research, and reform by youth.
 
   return sendEmail({
     to: app.email,
+    replyTo: OFFICIAL_EMAIL,
+    subject,
+    text,
+    html
+  })
+}
+
+/**
+ * 4. Executive Account Approval Confirmation Email
+ * Sent when the Chief Executive Officer approves a newly registered executive account.
+ */
+export async function sendExecutiveApprovalEmail(officer: {
+  name: string
+  email?: string
+  title: string
+  department: string
+  ecardId: string
+}) {
+  if (!officer.email) return
+
+  const safeName = escapeHtml(officer.name)
+  const safeTitle = escapeHtml(officer.title)
+  const safeDept = escapeHtml(officer.department)
+  const safeEcard = escapeHtml(officer.ecardId)
+  const subject = `[UYFSR Executive Account Approved] Welcome to the Secretariat, ${sanitizeHeader(officer.name)}`
+
+  const text = `
+Dear ${officer.name},
+
+Congratulations! Your Executive Portal account registration with the United Youth Forum of Science and Research (UYFSR) has been reviewed and officially APPROVED by the Chief Executive Officer.
+
+Executive Credentials:
+- Name: ${officer.name}
+- Title: ${officer.title}
+- Department: ${officer.department}
+- Official E-Card ID: ${officer.ecardId}
+
+You can now sign in to the Executive Portal using your registered email (${officer.email}) or E-Card ID (${officer.ecardId}) along with the password you created during registration.
+
+Once signed in, you may edit your profile information, view your digital E-Card, access the council directory, and collaborate in the Secretariat Workspace.
+
+Warm regards,
+Office of the Chief Executive Officer
+United Youth Forum of Science and Research (UYFSR)
+uyfsr.org@gmail.com
+`.trim()
+
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UYFSR Executive Account Approved</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f7f7f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; color: #111111;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f7f7f5; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border: 1px solid #dcdcd8; border-top: 4px solid #0c7866;">
+          <tr>
+            <td style="padding: 28px 32px 20px; border-bottom: 1px solid #ecece9;">
+              <div style="font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #0c7866; font-weight: 700; margin-bottom: 6px;">
+                UYFSR EXECUTIVE COUNCIL · OFFICIAL RATIFICATION
+              </div>
+              <h1 style="margin: 0; font-family: Georgia, serif; font-size: 24px; color: #111111; font-weight: 600;">
+                Executive Account Approved
+              </h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 24px 32px; font-size: 15px; line-height: 1.65; color: #2b2b28;">
+              <p style="margin: 0 0 16px;">Dear <strong>${safeName}</strong>,</p>
+              <p style="margin: 0 0 18px;">
+                Your registration for the <strong>UYFSR Executive Secretariat Portal</strong> has been reviewed and officially <strong>APPROVED</strong> by the Chief Executive Officer. Your account is now active.
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f7f7f5; border: 1px solid #e5e5e0; margin: 18px 0;">
+                <tr>
+                  <td style="padding: 16px 20px; font-size: 14px; line-height: 1.7;">
+                    <div><strong>Official Name:</strong> ${safeName}</div>
+                    <div><strong>Designation:</strong> ${safeTitle}</div>
+                    <div><strong>Department:</strong> ${safeDept}</div>
+                    <div><strong>Official E-Card ID:</strong> <span style="color: #0c7866; font-weight: 700;">${safeEcard}</span></div>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin: 16px 0 0;">
+                You may now log in at the <strong>Executive Portal</strong> using your email address or E-Card ID and your chosen passkey. Once signed in, you can freely manage and update your own profile information anytime.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #f7f7f5; padding: 18px 32px; border-top: 1px solid #ecece9; font-size: 12px; color: #666662;">
+              <strong>United Youth Forum of Science and Research (UYFSR)</strong><br>
+              Office of the Chief Executive Officer · Dhaka, Bangladesh · uyfsr.org@gmail.com
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`.trim()
+
+  return sendEmail({
+    to: officer.email,
     replyTo: OFFICIAL_EMAIL,
     subject,
     text,

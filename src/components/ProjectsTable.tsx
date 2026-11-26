@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { sounds } from '../lib/audio'
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 
-interface EventItem {
+export interface EventItem {
   id: string
   title: string
   dateDisplay: {
@@ -10,12 +10,12 @@ interface EventItem {
     monthYear: string
     duration: string
   }
-  category: 'Science Fair & Olympiad' | 'Talent & Research Search' | 'Innovation & Project Showcase' | 'Workshops & Media'
+  category: string
   uyfsrRole: string
   organizer: string
   detailsNote: string
   description: string
-  status: 'Upcoming 2026' | 'Scheduled' | 'Completed'
+  status: 'Upcoming 2026' | 'Ongoing' | 'Scheduled' | 'Completed'
 }
 
 const events: EventItem[] = [
@@ -81,19 +81,14 @@ const events: EventItem[] = [
   }
 ]
 
-const categories = [
-  "All Programs",
-  "Science Fair & Olympiad",
-  "Talent & Research Search",
-  "Innovation & Project Showcase",
-  "Workshops & Media"
-]
-
 interface ProjectsTableProps {
   onOpenJoin?: () => void
+  eventsData?: EventItem[]
 }
 
-export const ProjectsTable: React.FC<ProjectsTableProps> = ({ onOpenJoin }) => {
+export const ProjectsTable: React.FC<ProjectsTableProps> = ({ onOpenJoin, eventsData }) => {
+  const activeEvents = eventsData && eventsData.length > 0 ? eventsData : events
+  const dynamicCategories = ['All Programs', ...Array.from(new Set(activeEvents.map((e) => e.category)))]
   const [selectedCategory, setSelectedCategory] = useState("All Programs")
   const [query, setQuery] = useState("")
   const [showAllMobile, setShowAllMobile] = useState(false)
@@ -129,7 +124,7 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({ onOpenJoin }) => {
     el.scrollBy({ left: dir === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' })
   }
 
-  const filtered = events.filter((e) => {
+  const filtered = activeEvents.filter((e) => {
     const matchesQuery =
       e.title.toLowerCase().includes(query.toLowerCase()) ||
       e.organizer.toLowerCase().includes(query.toLowerCase()) ||
@@ -176,7 +171,7 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({ onOpenJoin }) => {
               ref={categoryScrollRef}
               className="flex overflow-x-auto theme-scrollbar gap-1.5 pb-2.5 -mx-6 px-6 sm:mx-0 sm:px-0 flex-1 min-w-0"
             >
-              {categories.map((cat) => (
+              {dynamicCategories.map((cat) => (
                 <button
                   key={cat}
                   onClick={(e) => {

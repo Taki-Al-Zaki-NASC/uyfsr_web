@@ -13,6 +13,9 @@ export interface Executive {
   name: string
   email?: string
   phone?: string
+  dob?: string
+  photo?: string
+  facebookUrl?: string
   password?: string
   rankTier: 'Executive Council' | 'Advisors' | 'Secretariat'
   title: string
@@ -22,6 +25,8 @@ export interface Executive {
   ecardId: string
   activeSince: string
   bio: string
+  status?: 'active' | 'pending' | 'rejected'
+  appliedAt?: string
 }
 
 export interface Application {
@@ -118,6 +123,71 @@ export interface NewsPost {
   syncedAt: string
 }
 
+export interface SiteEvent {
+  id: string
+  title: string
+  dateDisplay: {
+    days: string
+    monthYear: string
+    duration: string
+  }
+  category: string
+  uyfsrRole: string
+  organizer: string
+  detailsNote: string
+  description: string
+  status: 'Upcoming 2026' | 'Ongoing' | 'Scheduled' | 'Completed'
+}
+
+export interface SitePartner {
+  id: string
+  name: string
+  role: string
+  description: string
+  logo: string
+  category: 'Strategic Alliances' | 'Media Consortium' | 'Club & Campus Partners' | 'Community & Affiliates'
+}
+
+export interface SiteFaq {
+  id: string
+  q: string
+  a: string
+  category: 'About UYFSR' | 'Olympiads & Fairs' | 'Participation & Research'
+}
+
+export interface SiteHero {
+  headline: string
+  leadText: string
+  foundationDate: string
+  foundationLabel: string
+  foundationSub: string
+  studentsTarget: number
+  studentsSuffix: string
+  studentsLabel: string
+  studentsSub: string
+  categoriesTarget: number
+  categoriesLabel: string
+  categoriesSub: string
+  alliancesTarget: number
+  alliancesLabel: string
+  alliancesSub: string
+}
+
+export interface SiteMissionVision {
+  missionTitle: string
+  missionText: string
+  visionTitle: string
+  visionText: string
+}
+
+export interface SiteContent {
+  hero: SiteHero
+  missionVision: SiteMissionVision
+  events: SiteEvent[]
+  partners: SitePartner[]
+  faqs: SiteFaq[]
+}
+
 export interface DatabaseSchema {
   executives: Executive[]
   applications: Application[]
@@ -126,6 +196,228 @@ export interface DatabaseSchema {
   messages: Message[]
   meetings: Meeting[]
   news: NewsPost[]
+  siteContent?: SiteContent
+}
+
+export const defaultSiteContent: SiteContent = {
+  hero: {
+    headline: 'Science, research, and reform by youth.',
+    leadText:
+      'Welcome to the official page of UYFSR — United Youth Forum of Science and Research, established 30 May 2025. Where young minds unite to ignite change through science and reform. We turn ideas into action, dreams into movements, and passion into progress. Join us in shaping a smarter, stronger, and sustainable tomorrow.',
+    foundationDate: '30 May 2025',
+    foundationLabel: 'Established foundation date',
+    foundationSub: 'Central Council charter established',
+    studentsTarget: 2.6,
+    studentsSuffix: 'K+',
+    studentsLabel: 'Students guided in research',
+    studentsSub: 'School & college cohorts nationwide',
+    categoriesTarget: 14,
+    categoriesLabel: 'Competition categories',
+    categoriesSub: 'National Science Eclipse disciplines',
+    alliancesTarget: 11,
+    alliancesLabel: 'Institutional alliances',
+    alliancesSub: 'TWIMBOL, KIDLON & media partners'
+  },
+  missionVision: {
+    missionTitle: 'Our Mission',
+    missionText:
+      'The mission of United Youth Forum of Science and Research (UYFSR) is to introduce and promote the culture of research among students and young individuals. We believe that research is not limited to scientists or higher-level academics; it is a field of exploration that everyone should have the opportunity to understand and experience. Our aim is to inspire students to think beyond textbooks, ask questions, explore new ideas, and develop a deeper understanding of the world through scientific thinking and research.',
+    visionTitle: 'Our Vision',
+    visionText:
+      'Our vision is to build a generation that is curious, creative, knowledgeable, and passionate about research and scientific exploration. We aspire to make research more accessible and familiar to students and people from different backgrounds, encouraging them to explore new possibilities, challenge existing ideas, and contribute to the advancement of knowledge.'
+  },
+  events: [
+    {
+      id: 'eclipse-2026',
+      title: 'National Science Eclipse 2026',
+      dateDisplay: { days: '16–18', monthYear: 'April 2026', duration: '3-Day Event' },
+      category: 'Science Fair & Olympiad',
+      uyfsrRole: 'Lead Organizer',
+      organizer: 'United Youth Forum of Science and Research (UYFSR)',
+      detailsNote: 'Official UYFSR Flagship Program',
+      description:
+        'Our flagship national science festival uniting young researchers, students, and aspiring innovators through project exhibitions, science competitions, and theoretical problem-solving olympiads.',
+      status: 'Upcoming 2026'
+    },
+    {
+      id: 'junior-talent-season-1',
+      title: 'KIDLON Presents Junior Talent Award – Season 1',
+      dateDisplay: { days: '18', monthYear: 'July 2026', duration: '21-Day Event' },
+      category: 'Talent & Research Search',
+      uyfsrRole: 'Community Partner',
+      organizer: 'TWIMBOL (Presented by KIDLON)',
+      detailsNote: 'Venue Partner: KIDLON',
+      description:
+        'A 21-day youth talent discovery program empowering school and college students to showcase original ideas, discover research interests, and receive structured mentorship.',
+      status: 'Scheduled'
+    },
+    {
+      id: 'junior-startup-season-1',
+      title: 'Junior Startup Challenge – Season 1',
+      dateDisplay: { days: '3', monthYear: 'September 2026', duration: 'Full-Day Summit' },
+      category: 'Innovation & Project Showcase',
+      uyfsrRole: 'Community Partner',
+      organizer: 'TWIMBOL',
+      detailsNote: 'Innovation & Startup Exhibition',
+      description:
+        'Encouraging young innovators to turn scientific inquiry and creative prototypes into meaningful societal solutions and community ventures.',
+      status: 'Scheduled'
+    },
+    {
+      id: 'journalism-carnival-2025',
+      title: '1st National Journalism Carnival 2025',
+      dateDisplay: { days: '17–19', monthYear: 'October 2025', duration: '3-Day Event' },
+      category: 'Workshops & Media',
+      uyfsrRole: 'Workshop Partner',
+      organizer: 'Adamjee School News Network & Communication Club',
+      detailsNote: 'Scientific Communication Sessions',
+      description:
+        'Specialized three-day educational carnival promoting scientific communication, objective reporting, and analytical journalism among youth.',
+      status: 'Completed'
+    }
+  ],
+  partners: [
+    {
+      id: 'p-twimbol',
+      name: 'TWIMBOL',
+      role: 'Strategic Event & Outreach Partner',
+      description:
+        'Co-organizing nationwide youth talent initiatives including the Junior Talent Award and Junior Startup Challenge.',
+      logo: '/images/partners/twimbol.png',
+      category: 'Strategic Alliances'
+    },
+    {
+      id: 'p-kidlon',
+      name: 'KIDLON',
+      role: 'Venue & Presenting Partner',
+      description:
+        'Providing hosting venues and presenting partner for Season 1 of the Junior Talent Award across national stages.',
+      logo: '/images/partners/kidlon.png',
+      category: 'Strategic Alliances'
+    },
+    {
+      id: 'p-mejology',
+      name: 'MEJOLOGY',
+      role: 'Academic Content Partner',
+      description:
+        'Academic content collaboration and curriculum development for secondary school empirical research workshops.',
+      logo: '/images/partners/mejology.svg',
+      category: 'Strategic Alliances'
+    },
+    {
+      id: 'p-astrosphere',
+      name: 'ASTROSPHERE',
+      role: 'Olympiad & Astronomy Co-organizer',
+      description:
+        'Co-organizing astronomical science sessions, olympiad question panels, and youth space awareness seminars.',
+      logo: '/images/partners/astrosphere.svg',
+      category: 'Strategic Alliances'
+    },
+    {
+      id: 'p-bayline',
+      name: 'The Bayline Journal',
+      role: 'Editorial Media Partner',
+      description:
+        'In-depth editorial coverage, investigative student science dispatches, and national carnival publications.',
+      logo: '/images/partners/bayline.svg',
+      category: 'Media Consortium'
+    },
+    {
+      id: 'p-motionbd',
+      name: 'Motion BD',
+      role: 'Broadcast Media Partner',
+      description:
+        'Video coverage, documentary production, and digital broadcast support for flagship science exhibitions.',
+      logo: '/images/partners/motion-bd.svg',
+      category: 'Media Consortium'
+    },
+    {
+      id: 'p-tezzfeed',
+      name: 'TezzFeed',
+      role: 'Digital Media Partner',
+      description:
+        'Digital media outreach and student innovator spotlight stories across national youth social communities.',
+      logo: '/images/partners/tezzfeed.svg',
+      category: 'Media Consortium'
+    },
+    {
+      id: 'p-adamjee',
+      name: 'Adamjee School News Network & Communication Club',
+      role: 'Campus Workshop & Club Partner',
+      description:
+        'Campus co-organizer and host for the 1st National Journalism Carnival 2025, collaborating on empirical reporting and media literacy clinics.',
+      logo: '/images/partners/adamjee.svg',
+      category: 'Club & Campus Partners'
+    },
+    {
+      id: 'p-learning',
+      name: 'Learning and Study Organization',
+      role: 'Academic Study Co-organizer',
+      description:
+        'Community student mobilization and academic study material curation for olympiad participants.',
+      logo: '/images/partners/learning-study.svg',
+      category: 'Club & Campus Partners'
+    },
+    {
+      id: 'p-focalvibe',
+      name: 'The Focal Vibe',
+      role: 'Creative Direction Partner',
+      description:
+        'Visual identity, creative design coordination, stagecraft aesthetics, and multimedia documentation.',
+      logo: '/images/partners/focal-vibe.svg',
+      category: 'Community & Affiliates'
+    },
+    {
+      id: 'p-yeasirians',
+      name: 'The Yeasirians',
+      role: 'Merchandise & Gift Partner',
+      description:
+        'Official merchandise, commemorative awards, and appreciation packages for competition laureates.',
+      logo: '/images/partners/yeasirians.svg',
+      category: 'Community & Affiliates'
+    },
+    {
+      id: 'p-aurelix',
+      name: 'Aurelix',
+      role: 'Event Fragrance Partner',
+      description:
+        'Event fragrance curation and participant welcome amenities for national symposia.',
+      logo: '/images/partners/aurelix.svg',
+      category: 'Community & Affiliates'
+    }
+  ],
+  faqs: [
+    {
+      id: 'faq-1',
+      q: 'What is the United Youth Forum of Science and Research (UYFSR)?',
+      a: 'United Youth Forum of Science and Research (UYFSR) is an educational and research-oriented organization established on 30 May 2025. Our mission is to promote science, research, innovation, and scientific awareness among young minds, turning curiosity into meaningful knowledge and impactful action.',
+      category: 'About UYFSR'
+    },
+    {
+      id: 'faq-2',
+      q: 'Who is eligible to participate in UYFSR programs and workshops?',
+      a: 'Our programs are open to school, college, and undergraduate students, as well as young independent researchers. We design our competitions, Olympiads, and seminars, including the National Science Eclipse and Junior Talent Awards, to welcome students at all stages of their academic journey.',
+      category: 'Participation & Research'
+    },
+    {
+      id: 'faq-3',
+      q: 'How does UYFSR make scientific research accessible to students?',
+      a: 'We believe research is not limited to senior institutional professors. We guide students to think beyond textbooks, formulate original questions, and learn practical methodology through hands-on seminars, peer collaboration, and project showcases.',
+      category: 'Participation & Research'
+    },
+    {
+      id: 'faq-4',
+      q: 'What are the flagship upcoming events scheduled for 2026?',
+      a: 'Key upcoming events include the National Science Eclipse 2026 (16–18 April 2026), KIDLON Presents Junior Talent Award: Season 1 (18 July 2026), and the Junior Startup Challenge: Season 1 (3 September 2026).',
+      category: 'Olympiads & Fairs'
+    },
+    {
+      id: 'faq-5',
+      q: 'How can institutions and youth clubs partner with UYFSR?',
+      a: 'We actively collaborate with educational institutions, campus media clubs, and partner organizations as co-organizers, workshop partners, and venue hosts, working alongside partners like TWIMBOL, KIDLON, MEJOLOGY, and Adamjee School Communication Club.',
+      category: 'About UYFSR'
+    }
+  ]
 }
 
 const initialSeed: DatabaseSchema = {
@@ -418,17 +710,21 @@ class JsonDatabase {
 
       const data = await fs.readFile(DB_FILE, 'utf-8')
       this.cache = JSON.parse(data)
-      // Synchronize executive council seed attributes (phones, emails, records)
+      // Synchronize missing executive council seed attributes (never overwrite user-edited fields)
       if (this.cache && Array.isArray(this.cache.executives)) {
         let changed = false
         for (const seedExec of initialSeed.executives) {
           const existing = this.cache.executives.find((e) => e.id === seedExec.id)
           if (existing) {
-            if (seedExec.email && existing.email !== seedExec.email) {
+            if (!existing.status) {
+              existing.status = 'active'
+              changed = true
+            }
+            if (seedExec.email && !existing.email) {
               existing.email = seedExec.email
               changed = true
             }
-            if (seedExec.phone && existing.phone !== seedExec.phone) {
+            if (seedExec.phone && !existing.phone) {
               existing.phone = seedExec.phone
               changed = true
             }
@@ -441,16 +737,20 @@ class JsonDatabase {
               changed = true
             }
           } else {
-            this.cache.executives.push(seedExec)
+            this.cache.executives.push({ ...seedExec, status: 'active' })
             changed = true
           }
+        }
+        if (!this.cache.siteContent) {
+          this.cache.siteContent = structuredClone(defaultSiteContent)
+          changed = true
         }
         if (changed) {
           await this.persist().catch(() => {})
         }
       }
     } catch {
-      this.cache = initialSeed
+      this.cache = { ...initialSeed, siteContent: structuredClone(defaultSiteContent) }
       await this.persist().catch(() => {})
     }
   }
@@ -483,13 +783,30 @@ class JsonDatabase {
     return this.cache![table]
   }
 
-  async insert<K extends keyof DatabaseSchema>(table: K, item: DatabaseSchema[K][number]): Promise<void> {
+  async getSiteContent(): Promise<SiteContent> {
+    if (!this.cache) await this.init()
+    if (!this.cache!.siteContent) {
+      this.cache!.siteContent = structuredClone(defaultSiteContent)
+    }
+    return this.cache!.siteContent
+  }
+
+  async setSiteContent(content: SiteContent): Promise<void> {
+    if (!this.cache) await this.init()
+    this.cache!.siteContent = content
+    await this.persist()
+  }
+
+  async insert<K extends Exclude<keyof DatabaseSchema, 'siteContent'>>(
+    table: K,
+    item: DatabaseSchema[K][number]
+  ): Promise<void> {
     if (!this.cache) await this.init()
     ;(this.cache![table] as any[]).push(item)
     await this.persist()
   }
 
-  async update<K extends keyof DatabaseSchema>(
+  async update<K extends Exclude<keyof DatabaseSchema, 'siteContent'>>(
     table: K,
     predicate: (item: DatabaseSchema[K][number]) => boolean,
     updater: (item: DatabaseSchema[K][number]) => void
@@ -509,7 +826,7 @@ class JsonDatabase {
     await this.persist()
   }
 
-  async delete<K extends keyof DatabaseSchema>(
+  async delete<K extends Exclude<keyof DatabaseSchema, 'siteContent'>>(
     table: K,
     predicate: (item: DatabaseSchema[K][number]) => boolean
   ): Promise<boolean> {

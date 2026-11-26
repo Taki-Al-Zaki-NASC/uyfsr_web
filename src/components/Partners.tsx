@@ -112,20 +112,25 @@ const partnerCategories = [
   'Community & Affiliates'
 ]
 
-export const Partners: React.FC = () => {
+interface PartnersProps {
+  partnersData?: Partner[]
+}
+
+export const Partners: React.FC<PartnersProps> = ({ partnersData }) => {
+  const activePartners = partnersData && partnersData.length > 0 ? partnersData : partners
   const [selectedCat, setSelectedCat] = useState<string>('All Partners')
   const [hoveredPartner, setHoveredPartner] = useState<Partner | null>(null)
   const [isPaused, setIsPaused] = useState<boolean>(false)
   const [viewMode, setViewMode] = useState<'marquee' | 'grid'>('marquee')
 
-  const filteredPartners = partners.filter(
+  const filteredPartners = activePartners.filter(
     (p) => selectedCat === 'All Partners' || p.category === selectedCat
   )
 
   // Duplicate for seamless infinite loop (needs 2 sets minimum for -50% translateX)
   const marqueeList = [...filteredPartners, ...filteredPartners]
 
-  const activeSpotlight = hoveredPartner || filteredPartners[0]
+  const activeSpotlight = hoveredPartner || filteredPartners[0] || activePartners[0]
 
   return (
     <section id="partners" className="py-14 sm:py-16 bg-[#ecece9] text-left relative overflow-hidden">
@@ -195,7 +200,7 @@ export const Partners: React.FC = () => {
             >
               {cat}
               <span className="ml-1.5 text-[11px] opacity-70">
-                ({cat === 'All Partners' ? partners.length : partners.filter(p => p.category === cat).length})
+                ({cat === 'All Partners' ? activePartners.length : activePartners.filter(p => p.category === cat).length})
               </span>
             </button>
           ))}
@@ -240,12 +245,12 @@ export const Partners: React.FC = () => {
                 >
                   {/* Top Bar: Logo + Tier Badge */}
                   <div className="flex items-center justify-between gap-3 mb-2.5">
-                    <div className="h-8 max-w-[130px] flex items-center justify-start overflow-hidden">
+                    <div className="h-10 max-w-[145px] bg-white border border-[#e5e5e0] px-2.5 py-1 rounded-xs flex items-center justify-center overflow-hidden shadow-2xs">
                       <img
                         src={partner.logo}
                         alt={`${partner.name} logo`}
-                        className={`max-h-7 max-w-[120px] object-contain transition-all duration-300 ${
-                          isHovered ? 'filter-none scale-105' : 'filter grayscale opacity-75'
+                        className={`max-h-8 max-w-[125px] object-contain transition-transform duration-300 ${
+                          isHovered ? 'scale-105' : ''
                         }`}
                       />
                     </div>
@@ -327,11 +332,11 @@ export const Partners: React.FC = () => {
               >
                 <div>
                   <div className="flex items-center justify-between gap-3 mb-3">
-                    <div className="h-8 max-w-[140px] flex items-center">
+                    <div className="h-11 max-w-[155px] bg-white border border-[#e5e5e0] px-2.5 py-1 rounded-xs flex items-center justify-center shadow-2xs">
                       <img
                         src={partner.logo}
                         alt={`${partner.name} logo`}
-                        className="max-h-7 max-w-[130px] object-contain filter grayscale group-hover:filter-none transition-all duration-300"
+                        className="max-h-8 max-w-[135px] object-contain group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
                     <span className="text-[10.5px] font-semibold text-[#064e43] bg-white border border-[#e5e5e0] px-2 py-0.5 rounded-xs">

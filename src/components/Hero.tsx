@@ -2,8 +2,11 @@ import React, { useState, useEffect, useRef } from 'react'
 import { LumaDotBackground } from './effects/LumaDotBackground'
 import { ArrowRight } from 'lucide-react'
 
+import type { SiteHeroData } from '../lib/api'
+
 interface HeroProps {
   onOpenJoin: () => void
+  heroData?: SiteHeroData
 }
 
 const AnimatedNumber: React.FC<{ target: number; suffix?: string; decimals?: number }> = ({
@@ -58,7 +61,25 @@ const AnimatedNumber: React.FC<{ target: number; suffix?: string; decimals?: num
   )
 }
 
-export const Hero: React.FC<HeroProps> = ({ onOpenJoin }) => {
+export const Hero: React.FC<HeroProps> = ({ onOpenJoin, heroData }) => {
+  const headline = heroData?.headline || 'Science, research, and reform by youth.'
+  const leadText =
+    heroData?.leadText ||
+    'Welcome to the official page of UYFSR — United Youth Forum of Science and Research, established 30 May 2025. Where young minds unite to ignite change through science and reform. We turn ideas into action, dreams into movements, and passion into progress. Join us in shaping a smarter, stronger, and sustainable tomorrow.'
+  const foundationDate = heroData?.foundationDate || '30 May 2025'
+  const foundationLabel = heroData?.foundationLabel || 'Established foundation date'
+  const foundationSub = heroData?.foundationSub || 'Central Council charter established'
+  const studentsTarget = heroData?.studentsTarget ?? 2.6
+  const studentsSuffix = heroData?.studentsSuffix ?? 'K+'
+  const studentsLabel = heroData?.studentsLabel || 'Students guided in research'
+  const studentsSub = heroData?.studentsSub || 'School & college cohorts nationwide'
+  const categoriesTarget = heroData?.categoriesTarget ?? 14
+  const categoriesLabel = heroData?.categoriesLabel || 'Competition categories'
+  const categoriesSub = heroData?.categoriesSub || 'National Science Eclipse disciplines'
+  const alliancesTarget = heroData?.alliancesTarget ?? 11
+  const alliancesLabel = heroData?.alliancesLabel || 'Institutional alliances'
+  const alliancesSub = heroData?.alliancesSub || 'TWIMBOL, KIDLON & media partners'
+
   return (
     <section id="about" className="pt-8 sm:pt-10 pb-14 sm:pb-20 bg-[#f7f7f5] relative overflow-hidden">
       {/* Interactive Luma-Dot Background Grid (60 FPS, Mouse-Reactive) */}
@@ -69,11 +90,11 @@ export const Hero: React.FC<HeroProps> = ({ onOpenJoin }) => {
         {/* Dominant Focal Statement & Manifesto Deck */}
         <div className="max-w-3xl mb-8 sm:mb-10">
           <h1 className="display-title text-[#111111] max-w-4xl mb-4 sm:mb-5">
-            Science, research, and reform by youth.
+            {headline}
           </h1>
 
           <p className="lead-text max-w-[65ch] text-[#2b2b28] text-[16.5px] sm:text-[19.5px] leading-relaxed mb-6 sm:mb-8">
-            Welcome to the official page of UYFSR — United Youth Forum of Science and Research, established 30 May 2025. Where young minds unite to ignite change through science and reform. We turn ideas into action, dreams into movements, and passion into progress. Join us in shaping a smarter, stronger, and sustainable tomorrow.
+            {leadText}
           </p>
 
           {/* Action Controls with Micro-Interactions */}
@@ -116,13 +137,13 @@ export const Hero: React.FC<HeroProps> = ({ onOpenJoin }) => {
             {/* Top Green Accent Glide Indicator */}
             <div className="absolute top-0 left-0 w-0 h-[2.5px] bg-[#0c7866] group-hover:w-full transition-all duration-500 ease-out" />
             <div className="text-2xl sm:text-3xl font-serif font-bold text-[#111111] group-hover:text-[#0c7866] group-hover:translate-x-1 transition-all duration-300 tabular-nums inline-block">
-              30 May 2025
+              {foundationDate}
             </div>
             <div className="text-[14.5px] text-[#2b2b28] mt-1 font-semibold group-hover:text-[#111111] transition-colors">
-              Established foundation date
+              {foundationLabel}
             </div>
             <div className="text-[13px] text-[#2b2b28]/80 mt-0.5 group-hover:text-[#2b2b28] transition-colors">
-              Central Council charter established
+              {foundationSub}
             </div>
           </div>
 
@@ -130,13 +151,13 @@ export const Hero: React.FC<HeroProps> = ({ onOpenJoin }) => {
             {/* Top Green Accent Glide Indicator */}
             <div className="absolute top-0 left-0 w-0 h-[2.5px] bg-[#0c7866] group-hover:w-full transition-all duration-500 ease-out" />
             <div className="text-2xl sm:text-3xl font-serif font-bold text-[#111111] group-hover:text-[#0c7866] group-hover:translate-x-1 transition-all duration-300 tabular-nums inline-block">
-              <AnimatedNumber target={2.6} decimals={1} suffix="K+" />
+              <AnimatedNumber target={studentsTarget} decimals={studentsTarget % 1 === 0 ? 0 : 1} suffix={studentsSuffix} />
             </div>
             <div className="text-[14.5px] text-[#2b2b28] mt-1 font-semibold group-hover:text-[#111111] transition-colors">
-              Students guided in research
+              {studentsLabel}
             </div>
             <div className="text-[13px] text-[#2b2b28]/80 mt-0.5 group-hover:text-[#2b2b28] transition-colors">
-              School & college cohorts nationwide
+              {studentsSub}
             </div>
           </div>
 
@@ -144,13 +165,13 @@ export const Hero: React.FC<HeroProps> = ({ onOpenJoin }) => {
             {/* Top Green Accent Glide Indicator */}
             <div className="absolute top-0 left-0 w-0 h-[2.5px] bg-[#0c7866] group-hover:w-full transition-all duration-500 ease-out" />
             <div className="text-2xl sm:text-3xl font-serif font-bold text-[#111111] group-hover:text-[#0c7866] group-hover:translate-x-1 transition-all duration-300 tabular-nums inline-block">
-              <AnimatedNumber target={14} suffix="" />
+              <AnimatedNumber target={categoriesTarget} suffix="" />
             </div>
             <div className="text-[14.5px] text-[#2b2b28] mt-1 font-semibold group-hover:text-[#111111] transition-colors">
-              Competition categories
+              {categoriesLabel}
             </div>
             <div className="text-[13px] text-[#2b2b28]/80 mt-0.5 group-hover:text-[#2b2b28] transition-colors">
-              National Science Eclipse disciplines
+              {categoriesSub}
             </div>
           </div>
 
@@ -158,13 +179,13 @@ export const Hero: React.FC<HeroProps> = ({ onOpenJoin }) => {
             {/* Top Green Accent Glide Indicator */}
             <div className="absolute top-0 left-0 w-0 h-[2.5px] bg-[#0c7866] group-hover:w-full transition-all duration-500 ease-out" />
             <div className="text-2xl sm:text-3xl font-serif font-bold text-[#111111] group-hover:text-[#0c7866] group-hover:translate-x-1 transition-all duration-300 tabular-nums inline-block">
-              <AnimatedNumber target={11} suffix="" />
+              <AnimatedNumber target={alliancesTarget} suffix="" />
             </div>
             <div className="text-[14.5px] text-[#2b2b28] mt-1 font-semibold group-hover:text-[#111111] transition-colors">
-              Institutional alliances
+              {alliancesLabel}
             </div>
             <div className="text-[13px] text-[#2b2b28]/80 mt-0.5 group-hover:text-[#2b2b28] transition-colors">
-              TWIMBOL, KIDLON & media partners
+              {alliancesSub}
             </div>
           </div>
 

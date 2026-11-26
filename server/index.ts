@@ -3,12 +3,13 @@ import cors from 'cors'
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
 import crypto from 'crypto'
-import { db, Executive, Application, StudentSubmission, Voucher, Message, Meeting } from './db.js'
+import { db, Executive, Application, StudentSubmission, Voucher, Message, Meeting, SiteContent } from './db.js'
 import { scrapeFacebookFeed } from './scraper.js'
 import {
   sendRegistrationEmail,
   sendContactInquiryEmail,
   sendStatusUpdateEmail,
+  sendExecutiveApprovalEmail,
   getOutbox,
   sendEmail,
   escapeHtml,
@@ -63,8 +64,8 @@ app.use(
   })
 )
 
-// 3. Payload size limiting (prevents DoS/Memory Flooding attacks)
-app.use(express.json({ limit: '50kb' }))
+// 3. Payload size limiting (supports compressed executive portraits & partner logos while preventing DoS)
+app.use(express.json({ limit: '4mb' }))
 
 // Helper to check if request is from localhost / internal dev proxy
 const isLocalhost = (ip?: string) => {
@@ -256,6 +257,19 @@ app.post('/api/auth/login', loginLimiter, async (req: Request, res: Response) =>
       })
     }
 
+    // Enforce CEO approval before new executive accounts can sign in
+    if (officer.status === 'pending') {
+      return res.status(403).json({
+        error:
+          'Your executive account registration is pending review and approval by the Chief Executive Officer. You will receive a confirmation email once approved.'
+      })
+    }
+    if (officer.status === 'rejected') {
+      return res.status(403).json({
+        error: 'Your executive account application was declined by the Executive Council.'
+      })
+    }
+
     // Strict Password / PIN Verification with Timing-Safe Comparison
     const pinMatches = officer.accessPin && safeCompare(officer.accessPin.toLowerCase(), loginPass.toLowerCase())
     const passwordMatches = (officer as any).password && safeCompare((officer as any).password, loginPass)
@@ -282,18 +296,111 @@ app.post('/api/auth/login', loginLimiter, async (req: Request, res: Response) =>
       officer: {
         id: officer.id,
         name: officer.name,
-        email: (officer as any).email,
+        email: officer.email,
+        phone: officer.phone,
+        dob: officer.dob,
+        photo: officer.photo,
+        facebookUrl: officer.facebookUrl,
         rankTier: officer.rankTier,
         title: officer.title,
         department: officer.department,
         isCEO: officer.isCEO,
         ecardId: officer.ecardId,
         activeSince: officer.activeSince,
-        bio: officer.bio
+        bio: officer.bio,
+        status: officer.status || 'active'
       }
     })
   } catch (err: any) {
     return res.status(500).json({ error: 'Authentication internal error.' })
+  }
+})
+
+// Public Executive Registration (Creates a 'pending' executive profile awaiting CEO approval)
+app.post('/api/auth/executive-register', publicFormLimiter, async (req: Request, res: Response) => {
+  try {
+    const { name, email, phone, dob, title, department, bio, password, photo, facebookUrl, rankTier } = req.body
+
+    const cleanName = (name || '').trim()
+    const cleanEmail = (email || '').trim().toLowerCase()
+    const cleanPhone = (phone || '').trim()
+    const cleanDob = (dob || '').trim()
+    const cleanTitle = (title || '').trim() || 'Executive Member'
+    const cleanDept = (department || '').trim() || 'General Secretariat'
+    const cleanBio = (bio || '').trim() || 'Appointed member of the United Youth Forum of Science and Research (UYFSR).'
+    const cleanPass = (password || '').trim()
+
+    if (!cleanName || cleanName.length < 2) {
+      return res.status(400).json({ error: 'Please enter your full name (at least 2 characters).' })
+    }
+    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      return res.status(400).json({ error: 'Please provide a valid email address.' })
+    }
+    if (!cleanPhone || cleanPhone.length < 10) {
+      return res.status(400).json({ error: 'Please provide a valid mobile phone number.' })
+    }
+    if (!cleanDob) {
+      return res.status(400).json({ error: 'Please provide your Date of Birth.' })
+    }
+    if (!cleanPass || cleanPass.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long.' })
+    }
+
+    const executives = await db.get('executives')
+    const duplicate = executives.find(
+      (e) =>
+        (e.email && e.email.toLowerCase() === cleanEmail) ||
+        e.name.toLowerCase() === cleanName.toLowerCase()
+    )
+
+    if (duplicate) {
+      if (duplicate.status === 'pending') {
+        return res.status(409).json({
+          error: 'An executive registration with this name or email is already pending CEO approval.'
+        })
+      }
+      return res.status(409).json({
+        error: 'An executive account with this name or email already exists. Please sign in instead.'
+      })
+    }
+
+    const nextNum = String(executives.length + 1).padStart(3, '0')
+    const validRankTier: Executive['rankTier'] =
+      rankTier === 'Executive Council' || rankTier === 'Advisors' || rankTier === 'Secretariat'
+        ? rankTier
+        : 'Secretariat'
+
+    const newExec: Executive = {
+      id: `exec-${Date.now()}`,
+      name: cleanName,
+      email: cleanEmail,
+      phone: cleanPhone,
+      dob: cleanDob,
+      photo: typeof photo === 'string' && photo.length > 10 ? photo : undefined,
+      facebookUrl: typeof facebookUrl === 'string' && facebookUrl.trim() ? facebookUrl.trim() : undefined,
+      password: cleanPass,
+      accessPin: cleanPass,
+      rankTier: validRankTier,
+      title: cleanTitle,
+      department: cleanDept,
+      isCEO: false,
+      ecardId: `UYFSR-EXEC-${nextNum}`,
+      activeSince: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      bio: cleanBio,
+      status: 'pending',
+      appliedAt: new Date().toISOString()
+    }
+
+    await db.insert('executives', newExec)
+
+    return res.status(201).json({
+      success: true,
+      message:
+        'Executive profile submitted successfully! Once reviewed and approved by the Chief Executive Officer, you will receive a confirmation email and can sign in.',
+      ecardId: newExec.ecardId
+    })
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to submit executive registration.' })
   }
 })
 
@@ -302,7 +409,7 @@ app.get('/api/auth/ecard/:cardId', async (req: Request, res: Response) => {
   const { cardId } = req.params
   const executives = await db.get('executives')
   const officer = executives.find(
-    (e) => e.ecardId && e.ecardId.toLowerCase() === cardId.trim().toLowerCase()
+    (e) => e.ecardId && e.ecardId.toLowerCase() === cardId.trim().toLowerCase() && e.status !== 'pending' && e.status !== 'rejected'
   )
   if (!officer) {
     return res.status(404).json({ error: 'E-Card ID not found in registry.' })
@@ -317,16 +424,202 @@ app.get('/api/auth/ecard/:cardId', async (req: Request, res: Response) => {
       department: officer.department,
       ecardId: officer.ecardId,
       isCEO: officer.isCEO,
-      activeSince: officer.activeSince
+      activeSince: officer.activeSince,
+      photo: officer.photo
     }
   })
 })
 
-// Public Executive List (Security Hardened: accessPin and password are never exposed)
+// Public Executive List (Security Hardened: active only, accessPin and password never exposed)
 app.get('/api/auth/executives', async (_req: Request, res: Response) => {
   const executives = await db.get('executives')
-  const safeList = executives.map(({ accessPin, password, ...rest }: any) => rest)
+  const safeList = executives
+    .filter((e) => e.status !== 'pending' && e.status !== 'rejected')
+    .map(({ accessPin, password, ...rest }: any) => rest)
   return res.json({ executives: safeList })
+})
+
+// Self-Service Executive Profile Update (Any authenticated executive can freely edit their own profile)
+app.put('/api/executives/me', async (req: Request, res: Response) => {
+  try {
+    const officer = await getAuthOfficer(req)
+    if (!officer) {
+      return res.status(401).json({ error: 'Executive authentication required.' })
+    }
+
+    const { name, email, phone, dob, department, bio, photo, facebookUrl, newPassword } = req.body
+
+    let updatedOfficer: Executive | null = null
+    const ok = await db.update(
+      'executives',
+      (e) => e.id === officer.id,
+      (e) => {
+        if (typeof name === 'string' && name.trim().length >= 2) e.name = name.trim()
+        if (typeof email === 'string' && email.trim().includes('@')) e.email = email.trim().toLowerCase()
+        if (typeof phone === 'string' && phone.trim().length >= 7) e.phone = phone.trim()
+        if (typeof dob === 'string') e.dob = dob.trim()
+        if (typeof department === 'string' && department.trim().length >= 2) e.department = department.trim()
+        if (typeof bio === 'string' && bio.trim().length >= 2) e.bio = bio.trim()
+        if (typeof photo === 'string' && photo.trim().length > 5) e.photo = photo.trim()
+        if (typeof facebookUrl === 'string') e.facebookUrl = facebookUrl.trim()
+        if (typeof newPassword === 'string' && newPassword.trim().length >= 6) {
+          e.password = newPassword.trim()
+        }
+        updatedOfficer = { ...e }
+      }
+    )
+
+    if (!ok || !updatedOfficer) {
+      return res.status(404).json({ error: 'Executive record not found.' })
+    }
+
+    const { accessPin, password, ...safeProfile } = updatedOfficer as any
+    return res.json({
+      success: true,
+      message: 'Your profile has been updated successfully.',
+      officer: safeProfile
+    })
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to update executive profile.' })
+  }
+})
+
+// CEO ONLY: List Pending Executive Account Registrations
+app.get('/api/executives/pending', async (req: Request, res: Response) => {
+  const officer = await getAuthOfficer(req)
+  if (!officer) return res.status(401).json({ error: 'Authentication required.' })
+  if (!officer.isCEO) {
+    return res.status(403).json({ error: 'Permission Denied: Only the Chief Executive Officer can review pending executive accounts.' })
+  }
+
+  const executives = await db.get('executives')
+  const pending = executives
+    .filter((e) => e.status === 'pending')
+    .map(({ accessPin, password, ...rest }: any) => rest)
+
+  return res.json({ pending })
+})
+
+// CEO ONLY: Approve Pending Executive Account & Dispatch Confirmation Email
+app.post('/api/executives/:id/approve', async (req: Request, res: Response) => {
+  try {
+    const officer = await getAuthOfficer(req)
+    if (!officer) return res.status(401).json({ error: 'Authentication required.' })
+    if (!officer.isCEO) {
+      return res.status(403).json({ error: 'Permission Denied: Only the Chief Executive Officer can approve executive accounts.' })
+    }
+
+    const { id } = req.params
+    const { title, rankTier } = req.body || {}
+    let approvedExec: Executive | null = null
+
+    const ok = await db.update(
+      'executives',
+      (e) => e.id === id,
+      (e) => {
+        e.status = 'active'
+        e.activeSince = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+        if (typeof title === 'string' && title.trim()) e.title = title.trim()
+        if (rankTier === 'Executive Council' || rankTier === 'Advisors' || rankTier === 'Secretariat') {
+          e.rankTier = rankTier
+        }
+        approvedExec = { ...e }
+      }
+    )
+
+    if (!ok || !approvedExec) {
+      return res.status(404).json({ error: 'Pending executive record not found.' })
+    }
+
+    // Send Official Executive Account Approved Confirmation Email
+    sendExecutiveApprovalEmail(approvedExec).catch((err) => {
+      console.error('[EMAIL ERROR] Executive approval email dispatch failed:', err)
+    })
+
+    const { accessPin, password, ...safeExec } = approvedExec as any
+    return res.json({
+      success: true,
+      message: `${(approvedExec as Executive).name} has been approved! Confirmation email dispatched.`,
+      executive: safeExec
+    })
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to approve executive account.' })
+  }
+})
+
+// CEO ONLY: Reject Pending Executive Account
+app.post('/api/executives/:id/reject', async (req: Request, res: Response) => {
+  try {
+    const officer = await getAuthOfficer(req)
+    if (!officer) return res.status(401).json({ error: 'Authentication required.' })
+    if (!officer.isCEO) {
+      return res.status(403).json({ error: 'Permission Denied: Only the Chief Executive Officer can reject executive registrations.' })
+    }
+
+    const { id } = req.params
+    const removed = await db.delete('executives', (e) => e.id === id && e.status === 'pending')
+    if (!removed) {
+      return res.status(404).json({ error: 'Pending executive request not found.' })
+    }
+
+    return res.json({
+      success: true,
+      message: 'Pending executive registration has been declined and removed.'
+    })
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to reject executive account.' })
+  }
+})
+
+// ==========================================
+// 1.05 SITE CONTENT CMS (PUBLIC READ / CEO-ONLY WRITE)
+// ==========================================
+app.get('/api/site-content', async (_req: Request, res: Response) => {
+  try {
+    const siteContent = await db.getSiteContent()
+    const news = await db.get('news')
+    return res.json({ siteContent, news })
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to load site content.' })
+  }
+})
+
+app.put('/api/site-content', async (req: Request, res: Response) => {
+  try {
+    const officer = await getAuthOfficer(req)
+    if (!officer) return res.status(401).json({ error: 'Authentication required.' })
+    if (!officer.isCEO) {
+      return res.status(403).json({
+        error: 'Permission Denied: Only the Chief Executive Officer has authority to modify public website content and events.'
+      })
+    }
+
+    const current = await db.getSiteContent()
+    const { hero, missionVision, events, partners, faqs, news } = req.body as Partial<SiteContent> & { news?: any[] }
+
+    const updated: SiteContent = {
+      hero: hero ? { ...current.hero, ...hero } : current.hero,
+      missionVision: missionVision ? { ...current.missionVision, ...missionVision } : current.missionVision,
+      events: Array.isArray(events) ? events : current.events,
+      partners: Array.isArray(partners) ? partners : current.partners,
+      faqs: Array.isArray(faqs) ? faqs : current.faqs
+    }
+
+    await db.setSiteContent(updated)
+    if (Array.isArray(news)) {
+      await db.set('news', news)
+    }
+
+    const latestNews = await db.get('news')
+    return res.json({
+      success: true,
+      message: 'Website content published successfully by CEO.',
+      siteContent: updated,
+      news: latestNews
+    })
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to save site content.' })
+  }
 })
 
 // ==========================================

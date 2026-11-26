@@ -1,6 +1,20 @@
 import React from 'react'
+import type { SiteMissionVisionData } from '../lib/api'
 
-export const HowItWorks: React.FC = () => {
+interface HowItWorksProps {
+  missionVisionData?: SiteMissionVisionData
+}
+
+export const HowItWorks: React.FC<HowItWorksProps> = ({ missionVisionData }) => {
+  const missionTitle = missionVisionData?.missionTitle || 'Our Mission'
+  const missionText =
+    missionVisionData?.missionText ||
+    'The mission of United Youth Forum of Science and Research (UYFSR) is to introduce and promote the culture of research among students and young individuals. We believe that research is not limited to scientists or higher-level academics; it is a field of exploration that everyone should have the opportunity to understand and experience. Our aim is to inspire students to think beyond textbooks, ask questions, explore new ideas, and develop a deeper understanding of the world through scientific thinking and research.'
+  const visionTitle = missionVisionData?.visionTitle || 'Our Vision'
+  const visionText =
+    missionVisionData?.visionText ||
+    'Our vision is to build a generation that is curious, creative, knowledgeable, and passionate about research and scientific exploration. We aspire to make research more accessible and familiar to students and people from different backgrounds, encouraging them to explore new possibilities, challenge existing ideas, and contribute to the advancement of knowledge.'
+
   return (
     <section id="mission" className="py-14 sm:py-16 bg-[#ecece9]">
       <div className="max-w-6xl mx-auto px-6 sm:px-8 text-left">
@@ -40,13 +54,10 @@ export const HowItWorks: React.FC = () => {
                 Organizational purpose
               </div>
               <h3 className="text-xl sm:text-2xl font-serif text-[#111111]">
-                Our Mission
+                {missionTitle}
               </h3>
               <p className="text-[16px] text-[#2b2b28] leading-relaxed max-w-[60ch]">
-                The mission of United Youth Forum of Science and Research (UYFSR) is to introduce and promote the culture of research among students and young individuals. We believe that research is not limited to scientists or higher-level academics; it is a field of exploration that everyone should have the opportunity to understand and experience.
-              </p>
-              <p className="text-[16px] text-[#2b2b28] leading-relaxed max-w-[60ch]">
-                Our aim is to inspire students to think beyond textbooks, ask questions, explore new ideas, and develop a deeper understanding of the world through scientific thinking and research. We strive to create opportunities for young minds to discover research, develop their interests, enhance their knowledge, and turn their curiosity into meaningful ideas through workshops, seminars, competitions, Olympiads, and various educational initiatives.
+                {missionText}
               </p>
             </div>
 
@@ -56,13 +67,10 @@ export const HowItWorks: React.FC = () => {
                 Long-term outlook
               </div>
               <h3 className="text-xl sm:text-2xl font-serif text-[#111111]">
-                Our Vision
+                {visionTitle}
               </h3>
               <p className="text-[16px] text-[#2b2b28] leading-relaxed max-w-[60ch]">
-                Our vision is to build a generation that is curious, creative, knowledgeable, and passionate about research and scientific exploration. We aspire to make research more accessible and familiar to students and people from different backgrounds, encouraging them to explore new possibilities, challenge existing ideas, and contribute to the advancement of knowledge.
-              </p>
-              <p className="text-[16px] text-[#2b2b28] leading-relaxed max-w-[60ch]">
-                Ultimately, we want to establish a strong research-oriented community where young minds are empowered to explore, innovate, share knowledge, and create a positive impact on society through science and research.
+                {visionText}
               </p>
             </div>
           </div>

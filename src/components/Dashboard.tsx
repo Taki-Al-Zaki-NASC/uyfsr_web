@@ -20,12 +20,16 @@ import {
   Eye,
   Users,
   X,
-  Trash2
+  Trash2,
+  Edit3,
+  Globe
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { sounds } from '../lib/audio'
 import { CVModal } from './CVModal'
 import { ApplicantDetailModal } from './ApplicantDetailModal'
+import { ExecutiveProfileModal } from './ExecutiveProfileModal'
+import { CeoCmsPanel } from './CeoCmsPanel'
 import {
   apiApproveSubmission,
   apiRejectSubmission,
@@ -42,13 +46,17 @@ import {
   apiGetVouchers,
   apiGetMeetings,
   apiSendApplicantEmail,
-  apiToggleMailedStatus
+  apiToggleMailedStatus,
+  apiGetPendingExecutives,
+  type SiteContentData,
+  type ExecutiveProfileData
 } from '../lib/api'
 
 interface DashboardProps {
   officerName: string
   onViewPublicWebsite: () => void
   onLogout: () => void
+  onSiteContentUpdated?: (content: SiteContentData, news?: any[]) => void
 }
 
 type ExecutiveTier = 'Executive Council' | 'Advisors' | 'Senior Executive' | 'Sub-Executive'
@@ -61,6 +69,9 @@ interface ExecutiveProfile {
   department: string
   email: string
   phone: string
+  dob?: string
+  bio?: string
+  facebookUrl?: string
   image: string
   issueDate: string
   clearanceLevel: string
@@ -384,24 +395,85 @@ function setLocalMapItem<T>(key: string, id: string, val: T) {
 export const Dashboard: React.FC<DashboardProps> = ({
   officerName,
   onViewPublicWebsite,
-  onLogout
+  onLogout,
+  onSiteContentUpdated
 }) => {
-  // Current active officer profile strictly locked to logged-in executive
-  const [currentOfficerName] = useState<string>(() => {
-    const match = executiveTeam.find(
-      (e) => e.name.toLowerCase() === officerName.toLowerCase()
-    )
-    return match ? match.name : executiveTeam[0].name
+  // Stored backend executive profile (supports newly registered & self-edited executives!)
+  const [profileOverride, setProfileOverride] = useState<Partial<ExecutiveProfileData> | null>(() => {
+    try {
+      const raw = localStorage.getItem('uyfsr_executive_officer')
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (parsed && parsed.name && parsed.name.toLowerCase() === officerName.toLowerCase()) {
+          return parsed
+        }
+      }
+    } catch {}
+    return null
   })
 
-  const currentProfile = executiveTeam.find((e) => e.name === currentOfficerName) || executiveTeam[0]
+  // Edit My Profile modal state
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false)
+  const [pendingExecCount, setPendingExecCount] = useState(0)
+
+  // Current active officer profile merged with live backend data
+  const staticMatch = executiveTeam.find(
+    (e) => e.name.toLowerCase() === officerName.toLowerCase()
+  )
+
+  const currentProfile: ExecutiveProfile = staticMatch
+    ? {
+        ...staticMatch,
+        name: profileOverride?.name || staticMatch.name,
+        email: profileOverride?.email || staticMatch.email,
+        phone: profileOverride?.phone || staticMatch.phone,
+        dob: profileOverride?.dob || staticMatch.dob,
+        department: profileOverride?.department || staticMatch.department,
+        bio: profileOverride?.bio || staticMatch.bio,
+        facebookUrl: profileOverride?.facebookUrl || staticMatch.facebookUrl,
+        image: profileOverride?.photo || staticMatch.image
+      }
+    : {
+        id: profileOverride?.ecardId || 'UYFSR-EXEC-NEW',
+        name: profileOverride?.name || officerName,
+        rankTier: (profileOverride?.rankTier as ExecutiveTier) || 'Senior Executive',
+        title: profileOverride?.title || 'Executive Member',
+        department: profileOverride?.department || 'General Secretariat',
+        email: profileOverride?.email || 'uyfsr.org@gmail.com',
+        phone: profileOverride?.phone || '+880 1911-287501',
+        dob: profileOverride?.dob,
+        bio: profileOverride?.bio,
+        facebookUrl: profileOverride?.facebookUrl,
+        image: profileOverride?.photo || '/images/executives/khaled-saifullah-rohan-adviser.jpeg',
+        issueDate: profileOverride?.activeSince || '30 May 2025',
+        clearanceLevel: 'Clearance Tier 2 · Appointed Executive',
+        isCEO: Boolean(profileOverride?.isCEO),
+        portfolioTasks: [
+          {
+            id: 'T-NEW-01',
+            title: 'Complete onboarding and coordinate with assigned UYFSR department',
+            deadline: '30 Nov 2026',
+            priority: 'High',
+            status: 'In Progress'
+          }
+        ]
+      }
+
   const isCEO =
     Boolean(currentProfile.isCEO) ||
     currentProfile.name.toLowerCase().trim() === 'mustafiz bin jihad'
 
+  // Fetch pending executive approvals count for CEO badge
+  useEffect(() => {
+    if (!isCEO) return
+    apiGetPendingExecutives(currentProfile.name)
+      .then((list) => setPendingExecCount(list.length))
+      .catch(() => {})
+  }, [isCEO, currentProfile.name])
+
   // Main active tab
   const [activeTab, setActiveTab] = useState<
-    'ecard' | 'portfolio' | 'chat' | 'vouchers' | 'meetings' | 'directory' | 'applicants'
+    'ecard' | 'portfolio' | 'chat' | 'vouchers' | 'meetings' | 'directory' | 'applicants' | 'cms'
   >('ecard')
 
   // Applicant Dossier Modal
@@ -1405,6 +1477,28 @@ Dhaka, Bangladesh · Official Email: uyfsr.org@gmail.com`
               CEO Auth
             </span>
           </button>
+
+          {isCEO && (
+            <button
+              onClick={() => {
+                sounds.playClick()
+                setActiveTab('cms')
+              }}
+              className={`pb-3 cursor-pointer transition-colors flex items-center gap-1.5 ${
+                activeTab === 'cms'
+                  ? 'border-b-2 border-[#0c7866] text-[#0c7866]'
+                  : 'text-[#2b2b28] hover:text-[#111111]'
+              }`}
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>Site CMS & Approvals</span>
+              {pendingExecCount > 0 && (
+                <span className="text-[10.5px] font-bold px-1.5 py-0.2 bg-amber-500 text-white rounded-full">
+                  {pendingExecCount}
+                </span>
+              )}
+            </button>
+          )}
         </div>
 
         {/* TAB 1: OFFICIAL ELECTRONIC MEMBER ID CARD (E-CARD) */}
@@ -1420,7 +1514,18 @@ Dhaka, Bangladesh · Official Email: uyfsr.org@gmail.com`
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <button
+                  onClick={() => {
+                    sounds.playClick()
+                    setShowEditProfileModal(true)
+                  }}
+                  className="px-4 py-2 bg-[#111111] hover:bg-[#0c7866] text-white text-[13px] font-medium transition-colors cursor-pointer flex items-center gap-2"
+                >
+                  <Edit3 className="w-4 h-4" />
+                  <span>Edit My Profile</span>
+                </button>
+
                 <button
                   onClick={() => setIsCardFlipped(!isCardFlipped)}
                   className="px-4 py-2 bg-[#ecece9] hover:bg-[#e0e0dc] text-[#111111] text-[13px] font-medium transition-colors cursor-pointer flex items-center gap-2"
@@ -1492,8 +1597,19 @@ Dhaka, Bangladesh · Official Email: uyfsr.org@gmail.com`
                       <div className="text-[13px] text-[#ecece9]/70">
                         {currentProfile.department}
                       </div>
-                      <div className="pt-2 text-[12px] text-[#ecece9]/50">
-                        Official Email: <span className="text-[#ecece9]">{currentProfile.email}</span>
+                      <div className="pt-2 space-y-1 text-[12px] text-[#ecece9]/55">
+                        <div>
+                          Official Email: <span className="text-[#ecece9]">{currentProfile.email}</span>
+                        </div>
+                        <div>
+                          Phone: <span className="text-[#ecece9]">{currentProfile.phone}</span>
+                        </div>
+                        <div>
+                          Date of Birth:{' '}
+                          <span className="text-[#ecece9]">
+                            {currentProfile.dob || 'Not set (Click Edit My Profile)'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2730,6 +2846,19 @@ Dhaka, Bangladesh · Official Email: uyfsr.org@gmail.com`
             </div>
           </div>
         )}
+
+        {/* TAB 8: CEO SITE CONTENT CMS & PENDING EXECUTIVE APPROVALS */}
+        {activeTab === 'cms' && isCEO && (
+          <CeoCmsPanel
+            officerName={currentProfile.name}
+            onSiteContentUpdated={onSiteContentUpdated}
+            onExecutiveApproved={() => {
+              apiGetPendingExecutives(currentProfile.name)
+                .then((list) => setPendingExecCount(list.length))
+                .catch(() => {})
+            }}
+          />
+        )}
       </main>
 
       {/* CEO Custom Email Composer Modal */}
@@ -2908,6 +3037,30 @@ Dhaka, Bangladesh · Official Email: uyfsr.org@gmail.com`
           isOpen={showCVModal}
           onClose={() => setShowCVModal(false)}
           executive={currentProfile}
+        />
+      )}
+
+      {/* Self-Service Executive Profile Editor Modal */}
+      {showEditProfileModal && (
+        <ExecutiveProfileModal
+          officerName={currentProfile.name}
+          initialProfile={{
+            name: currentProfile.name,
+            email: currentProfile.email,
+            phone: currentProfile.phone,
+            dob: currentProfile.dob,
+            department: currentProfile.department,
+            bio: currentProfile.bio,
+            image: currentProfile.image,
+            facebookUrl: currentProfile.facebookUrl
+          }}
+          onClose={() => setShowEditProfileModal(false)}
+          onSaved={(updated) => {
+            setProfileOverride(updated)
+            try {
+              localStorage.setItem('uyfsr_executive_officer', JSON.stringify(updated))
+            } catch {}
+          }}
         />
       )}
     </div>

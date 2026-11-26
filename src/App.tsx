@@ -34,6 +34,7 @@ const ViewFallback = () => (
 
 import { Footer } from './components/Footer'
 import { ArrowRight } from 'lucide-react'
+import { apiGetSiteContent, type SiteContentData } from './lib/api'
 
 type PageView = 'home' | 'register' | 'executive-login' | 'dashboard' | 'ambassador' | 'not-found'
 
@@ -93,6 +94,15 @@ export function App() {
   const [pageView, setPageView] = useState<PageView>(initial.view)
   const [currentOfficer, setCurrentOfficer] = useState<string | null>(initial.officer)
   const [donateModalOpen, setDonateModalOpen] = useState(false)
+  const [siteContent, setSiteContent] = useState<SiteContentData | null>(null)
+
+  useEffect(() => {
+    apiGetSiteContent()
+      .then((res) => {
+        if (res && res.siteContent) setSiteContent(res.siteContent)
+      })
+      .catch(() => {})
+  }, [])
 
   // Synchronize URL hash with current page view
   const updateHashForView = useCallback((view: PageView, anchor?: string) => {
@@ -272,6 +282,7 @@ export function App() {
           officerName={currentOfficer}
           onViewPublicWebsite={() => goToHome()}
           onLogout={handleLogout}
+          onSiteContentUpdated={(updated) => setSiteContent(updated)}
         />
       </Suspense>
     )
@@ -362,13 +373,13 @@ export function App() {
       {/* Main Content */}
       <main className="flex-1">
         {/* Hero Section */}
-        <Hero onOpenJoin={goToRegister} />
+        <Hero onOpenJoin={goToRegister} heroData={siteContent?.hero} />
 
         {/* Core Areas of Initiative */}
         <Tracks onOpenJoin={goToRegister} />
 
         {/* Academic Calendar & Symposia */}
-        <ProjectsTable onOpenJoin={goToRegister} />
+        <ProjectsTable onOpenJoin={goToRegister} eventsData={siteContent?.events} />
 
         {/* News & Official Dispatches */}
         <NewsSection
@@ -378,16 +389,16 @@ export function App() {
         />
 
         {/* Mission & Vision */}
-        <HowItWorks />
+        <HowItWorks missionVisionData={siteContent?.missionVision} />
 
         {/* Consortium of Partners */}
-        <Partners />
+        <Partners partnersData={siteContent?.partners} />
 
         {/* Leadership */}
         <AboutUs />
 
         {/* Frequently Asked Questions */}
-        <FAQ />
+        <FAQ faqsData={siteContent?.faqs} />
 
         {/* Final Fellowship & Participation Callout */}
         <section className="py-14 sm:py-16 bg-[#ecece9] text-left">

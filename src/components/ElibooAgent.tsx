@@ -25,6 +25,7 @@ export interface Message {
     href: string
     view?: 'home' | 'register' | 'executive-login' | 'dashboard' | 'ambassador'
     anchor?: string
+    leaderName?: string
   }
 }
 
@@ -140,6 +141,19 @@ export const ElibooAgent: React.FC<ElibooAgentProps> = ({ onNavigate }) => {
   const handleActionClick = (actionLink: Message['actionLink']) => {
     if (!actionLink) return
     sounds.playClick()
+
+    if (actionLink.leaderName) {
+      try {
+        sessionStorage.setItem('uyfsr_focus_leader', actionLink.leaderName)
+      } catch {
+        // ignore
+      }
+      window.dispatchEvent(
+        new CustomEvent('uyfsr:focus-leader', {
+          detail: { name: actionLink.leaderName }
+        })
+      )
+    }
 
     if (actionLink.view && onNavigate) {
       onNavigate(actionLink.view, actionLink.anchor)
