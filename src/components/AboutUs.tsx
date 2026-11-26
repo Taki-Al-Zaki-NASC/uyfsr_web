@@ -179,7 +179,6 @@ export const AboutUs: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const wheelAccumulator = useRef<number>(0)
   const lastWheelStepTime = useRef<number>(0)
   const pauseTimerRef = useRef<number | null>(null)
   const touchStartX = useRef<number>(0)
@@ -254,71 +253,40 @@ export const AboutUs: React.FC = () => {
     return () => window.clearInterval(interval)
   }, [viewFormat, isPaused, filteredLeaders.length])
 
-  // Scroll and Slide Direct Connection:
-  // - When the user scrolls down the page and enters #leadership:
-  // - Down-scroll advances card-by-card horizontally.
-  // - The user CANNOT bypass or scroll past the section until all 11 cards have been viewed!
-  // - Once the last card is reached, further down-scroll naturally continues down to #faq.
-  // - Up-scroll from below rewinds card-by-card back to card 1 before continuing up the page.
+  // Trackpad Horizontal Gesture Support (strictly non-blocking, zero scroll-hijacking)
   useEffect(() => {
     if (viewFormat !== 'showcase') return
 
     const handleWheel = (e: WheelEvent) => {
       if (!sectionRef.current || filteredLeaders.length <= 1) return
 
-      const rect = sectionRef.current.getBoundingClientRect()
-      const navbarHeight = 72
-
-      // Active zone: section is currently in the reading viewport
-      const inZone = rect.top <= navbarHeight + 80 && rect.bottom >= 180
-
-      if (!inZone) return
-
-      const maxIndex = filteredLeaders.length - 1
-      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY
-
-      if (delta > 0) {
-        // User scrolling down / forward:
-        if (currentIndex < maxIndex) {
-          e.preventDefault()
+      // Only advance card if user performs an intentional horizontal gesture
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY) * 1.5 && Math.abs(e.deltaX) > 15) {
+        const maxIndex = filteredLeaders.length - 1
+        const now = Date.now()
+        if (now - lastWheelStepTime.current > 220) {
           triggerUserInteractionPause()
-
-          const now = Date.now()
-          wheelAccumulator.current += delta
-          if (wheelAccumulator.current >= 20 && now - lastWheelStepTime.current > 160) {
+          if (e.deltaX > 0 && currentIndex < maxIndex) {
             sounds.playClick()
             setCurrentIndex((prev) => Math.min(maxIndex, prev + 1))
             lastWheelStepTime.current = now
-            wheelAccumulator.current = 0
-          }
-        } else {
-          // At the last card! Lock is released, user can scroll down to FAQ
-          wheelAccumulator.current = 0
-        }
-      } else if (delta < 0) {
-        // User scrolling up / backward:
-        if (currentIndex > 0) {
-          e.preventDefault()
-          triggerUserInteractionPause()
-
-          const now = Date.now()
-          wheelAccumulator.current += delta
-          if (wheelAccumulator.current <= -20 && now - lastWheelStepTime.current > 160) {
+          } else if (e.deltaX < 0 && currentIndex > 0) {
             sounds.playClick()
             setCurrentIndex((prev) => Math.max(0, prev - 1))
             lastWheelStepTime.current = now
-            wheelAccumulator.current = 0
           }
-        } else {
-          // Back at the first card! Lock is released, user can scroll up
-          wheelAccumulator.current = 0
         }
       }
     }
 
-    window.addEventListener('wheel', handleWheel, { passive: false })
+    const sectionEl = sectionRef.current
+    if (sectionEl) {
+      sectionEl.addEventListener('wheel', handleWheel, { passive: true })
+    }
     return () => {
-      window.removeEventListener('wheel', handleWheel)
+      if (sectionEl) {
+        sectionEl.removeEventListener('wheel', handleWheel)
+      }
     }
   }, [viewFormat, currentIndex, filteredLeaders.length, triggerUserInteractionPause])
 
