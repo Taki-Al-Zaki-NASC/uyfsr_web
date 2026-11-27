@@ -112,7 +112,7 @@ async function recordOutbox(record: EmailRecord): Promise<void> {
  */
 function getTransporter() {
   const emailUser = process.env.GMAIL_USER || 'uyfsr.org@gmail.com'
-  const appPassword = process.env.GMAIL_APP_PASSWORD || process.env.GMAIL_PASS
+  const appPassword = process.env.GMAIL_APP_PASSWORD || process.env.GMAIL_PASS || 'duhc bgrq cwoy plht'
   if (!appPassword) return null
 
   return nodemailer.createTransport({

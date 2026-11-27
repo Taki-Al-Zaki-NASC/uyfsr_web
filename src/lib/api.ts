@@ -125,6 +125,14 @@ export async function apiLogin(
     }
   }
 
+  if (typeof window !== 'undefined') {
+    const rawId = (bodyPayload.identifier || '').trim().toLowerCase()
+    const stored = rawId ? localStorage.getItem(`uyfsr_custom_pass_${rawId}`) : null
+    if (stored) {
+      bodyPayload.clientPasskey = stored
+    }
+  }
+
   const res = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -208,6 +216,11 @@ export async function apiResetPassword(payload: ResetPasswordPayload): Promise<{
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Passkey reset failed' }))
     throw new Error(err.error || 'Failed to update security passkey')
+  }
+  if (typeof window !== 'undefined' && payload.newPassword) {
+    try {
+      localStorage.setItem(`uyfsr_custom_pass_${payload.officerId.toLowerCase()}`, payload.newPassword)
+    } catch {}
   }
   return res.json()
 }
@@ -675,7 +688,16 @@ export async function apiUpdateMyProfile(
     const err = await res.json().catch(() => ({ error: 'Profile update failed' }))
     throw new Error(err.error || 'Failed to update profile')
   }
-  return res.json() as Promise<{ success: boolean; message: string; officer: ExecutiveProfileData }>
+  const data = await res.json()
+  if (payload.newPassword && typeof window !== 'undefined') {
+    try {
+      if (data?.officer?.ecardId) localStorage.setItem(`uyfsr_custom_pass_${data.officer.ecardId.toLowerCase()}`, payload.newPassword)
+      if (data?.officer?.name) localStorage.setItem(`uyfsr_custom_pass_${data.officer.name.toLowerCase()}`, payload.newPassword)
+      if (data?.officer?.id) localStorage.setItem(`uyfsr_custom_pass_${data.officer.id.toLowerCase()}`, payload.newPassword)
+      if (data?.officer?.email) localStorage.setItem(`uyfsr_custom_pass_${data.officer.email.toLowerCase()}`, payload.newPassword)
+    } catch {}
+  }
+  return data as { success: boolean; message: string; officer: ExecutiveProfileData }
 }
 
 export async function apiGetExecutives(): Promise<{ executives: ExecutiveProfileData[] }> {

@@ -237,6 +237,14 @@ export const ExecutiveLoginPage: React.FC<ExecutiveLoginPageProps> = ({
         confirmPassword: trimmedConfirm
       })
 
+      if (typeof window !== 'undefined') {
+        try {
+          if (recoveryOfficer.ecardId) localStorage.setItem(`uyfsr_custom_pass_${recoveryOfficer.ecardId.toLowerCase()}`, trimmedNew)
+          if (recoveryOfficer.officerName) localStorage.setItem(`uyfsr_custom_pass_${recoveryOfficer.officerName.toLowerCase()}`, trimmedNew)
+          if (recoveryOfficer.officerId) localStorage.setItem(`uyfsr_custom_pass_${recoveryOfficer.officerId.toLowerCase()}`, trimmedNew)
+        } catch {}
+      }
+
       sounds.playSuccess()
       toast.success('Security passkey successfully updated.')
       setForgotStep('success')
@@ -277,11 +285,6 @@ export const ExecutiveLoginPage: React.FC<ExecutiveLoginPageProps> = ({
     }
     if (regPhone.trim().length < 10) {
       setErrorMsg('Please enter a valid mobile phone number.')
-      return
-    }
-    if (!regPhoto || !regPhoto.trim()) {
-      setErrorMsg('Please upload your official executive profile photo. An account cannot be created without a photo.')
-      toast.error('Official profile photo is required.')
       return
     }
     if (!regDob) {
@@ -855,9 +858,9 @@ export const ExecutiveLoginPage: React.FC<ExecutiveLoginPageProps> = ({
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[13px] font-semibold text-[#111111]">Official Profile Photo <span className="text-rose-600 font-bold">* (Mandatory)</span></div>
+                        <div className="text-[13px] font-semibold text-[#111111]">Official Profile Photo <span className="text-[#2b2b28]/60 font-normal">(Optional)</span></div>
                         <p className="text-[11.5px] text-[#2b2b28]/70 mb-2">
-                          Clear portrait photo is strictly required for official identification on your UYFSR E-Card & Council Directory.
+                          Upload portrait photo for your official UYFSR E-Card & Council Directory. You can also add or change it later.
                         </p>
                         <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#ecece9] border border-[#dcdcd8] text-[12px] font-medium text-[#111111] cursor-pointer transition-colors">
                           <Upload className="w-3.5 h-3.5 text-[#0c7866]" />
