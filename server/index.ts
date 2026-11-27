@@ -204,23 +204,22 @@ async function getAuthOfficer(req: Request): Promise<Executive | null> {
         return found
       }
     }
-  }
 
-  // Strict fallback: If token is mock_jwt or x-officer-name header is passed for valid existing active officer
-    if (token && token.startsWith('mock_jwt_')) {
-      const decodedName = decodeURIComponent(token.slice('mock_jwt_'.length)).trim().toLowerCase();
-      const found = executives.find(e => e.name.toLowerCase() === decodedName && e.status !== 'pending' && e.status !== 'rejected');
-      if (found) return found;
+    // 3. Fallback: If token is mock_jwt
+    if (token.startsWith('mock_jwt_')) {
+      const decodedName = decodeURIComponent(token.slice('mock_jwt_'.length)).trim().toLowerCase()
+      const found = executives.find(e => e.name.toLowerCase() === decodedName && e.status !== 'pending' && e.status !== 'rejected')
+      if (found) return found
     }
   }
 
-  const officerHeader = (req.headers['x-officer-name'] as string)?.trim().toLowerCase();
+  const officerHeader = (req.headers['x-officer-name'] as string)?.trim().toLowerCase()
   if (officerHeader) {
-    const found = executives.find(e => e.name.toLowerCase() === officerHeader && e.status !== 'pending' && e.status !== 'rejected');
-    if (found) return found;
+    const found = executives.find(e => e.name.toLowerCase() === officerHeader && e.status !== 'pending' && e.status !== 'rejected')
+    if (found) return found
   }
 
-  return null;
+  return null
 }
 
 // Security Helper: Validate uploaded image data URIs / URLs against XSS / javascript: injection
