@@ -26,6 +26,9 @@ import {
   apiGetPendingExecutives,
   apiApproveExecutive,
   apiRejectExecutive,
+  apiGetInquiries,
+  apiDeleteMessage,
+  type InquiryItem,
   type SiteContentData,
   type SiteEventItem,
   type SitePartnerItem,
@@ -45,12 +48,13 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
   onSiteContentUpdated,
   onExecutiveApproved
 }) => {
-  const [subTab, setSubTab] = useState<'approvals' | 'events' | 'partners' | 'hero' | 'faqs'>('approvals')
+  const [subTab, setSubTab] = useState<'approvals' | 'inquiries' | 'events' | 'partners' | 'hero' | 'faqs'>('approvals')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
   // Pending executive approvals
   const [pendingExecs, setPendingExecs] = useState<ExecutiveProfileData[]>([])
+  const [inquiries, setInquiries] = useState<InquiryItem[]>([])
   const [actionId, setActionId] = useState<string | null>(null)
 
   // Editable site content
@@ -67,6 +71,7 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
       setContent(siteRes.siteContent)
       setNewsList(siteRes.news || [])
       setPendingExecs(pending)
+      setInquiries(await apiGetInquiries(officerName).catch(() => [] as InquiryItem[]))
     } catch (err: any) {
       toast.error(err.message || 'Failed to load CMS data.')
     } finally {
@@ -304,6 +309,19 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
 
         <button
           type="button"
+          onClick={() => setSubTab('inquiries')}
+          className={`px-3.5 py-2 text-[13px] font-medium cursor-pointer inline-flex items-center gap-1.5 transition-colors ${
+            subTab === 'inquiries'
+              ? 'bg-[#111111] text-white'
+              : 'bg-[#ecece9] text-[#2b2b28] hover:text-[#111111]'
+          }`}
+        >
+          <Mail className="w-3.5 h-3.5" />
+          <span>Public Inquiries ({inquiries.length})</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => setSubTab('events')}
           className={`px-3.5 py-2 text-[13px] font-medium cursor-pointer inline-flex items-center gap-1.5 transition-colors ${
             subTab === 'events'
@@ -354,6 +372,51 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
           <span>FAQs ({content?.faqs.length || 0})</span>
         </button>
       </div>
+
+      {subTab === 'inquiries' && (
+        <div className="space-y-4">
+          <h3 className="font-serif text-lg font-semibold text-[#111111]">
+            Public Inquiries ({inquiries.length})
+          </h3>
+          <p className="text-[12.5px] text-[#2b2b28]/70">
+            Messages sent through "Contact the Secretariat" on the main site. Visible to the CEO only.
+          </p>
+          {inquiries.length === 0 ? (
+            <div className="p-8 bg-white border border-[#ecece9] text-center text-[13px] text-[#2b2b28]/70">
+              No public inquiries yet.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {inquiries.map((q) => (
+                <div key={q.id} className="bg-white border border-[#ecece9] p-4 space-y-1.5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="text-[13.5px] font-semibold text-[#111111] break-all">{q.senderName}</div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[11px] text-[#2b2b28]/60">{q.timestamp}</span>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            await apiDeleteMessage(q.id, officerName)
+                            setInquiries((prev) => prev.filter((i) => i.id !== q.id))
+                          } catch (err: any) {
+                            toast.error(err.message || 'Delete failed.')
+                          }
+                        }}
+                        className="p-1 text-rose-600 hover:bg-rose-50 cursor-pointer"
+                        aria-label="Delete inquiry"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-[13px] text-[#2b2b28] whitespace-pre-wrap">{q.message}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ================================================================= */}
       {/* SUB-TAB 1: PENDING EXECUTIVE ACCOUNT APPROVALS                    */}

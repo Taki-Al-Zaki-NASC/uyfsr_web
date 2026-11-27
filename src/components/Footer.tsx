@@ -156,7 +156,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDonate }) => {
                   <span>Message Sent Successfully</span>
                 </div>
                 <p className="text-[12px] text-[#ecece9]/80 leading-relaxed">
-                  Thank you, <strong>{name}</strong>! Your inquiry has been delivered directly to the Secretariat. We will respond soon via <strong>uyfsr.org@gmail.com</strong> or your contact number.
+                  Thank you, <strong>{name}</strong>! Your inquiry has been delivered directly to the Chief Executive Officer. We will respond soon via <strong>uyfsr.org@gmail.com</strong> or your contact number.
                 </p>
                 <button
                   type="button"

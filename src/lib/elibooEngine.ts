@@ -554,9 +554,9 @@ const INTENT_RULES: IntentRule[] = [
   {
     id: 'REGISTRATION_STEPS',
     topic: 'registration',
-    patternsBn: ['রেজিস্ট্রেশন কিভাবে করব', 'কিভাবে নিবন্ধন করব', 'রেজিস্ট্রেশন নিয়ম', 'যুক্ত হব কিভাবে', 'ভর্তি হব কিভাবে', 'রেজিস্ট্রেশন', 'নিবন্ধন', 'কিভাবে রেজিস্ট্রেশন'],
-    patternsBanglish: ['kivabe register korbo', 'register kivabe korbo', 'kivabe join korbo', 'registration process', 'how to register', 'kivabe form fillup korbo', 'registration steps', 'registration procedure', 'register korbo'],
-    patternsEn: ['how to register', 'registration process', 'how to join', 'how to sign up', 'registration steps', 'apply for event', 'how do i register', 'register for competition', 'registration']
+    patternsBn: ['রেজিস্ট্রেশন কিভাবে করব', 'কীভাবে রেজিস্ট্রেশন করব', 'কিভাবে নিবন্ধন করব', 'রেজিস্ট্রেশনের নিয়ম', 'রেজিস্ট্রেশন করার নিয়ম', 'ইভেন্ট রেজিস্ট্রেশন', 'যুক্ত হব কিভাবে', 'ভর্তি হব কিভাবে', 'রেজিস্ট্রেশন', 'নিবন্ধন', 'কিভাবে রেজিস্ট্রেশন'],
+    patternsBanglish: ['kivabe register korbo', 'register kivabe korbo', 'kivabe join korbo', 'registration process', 'how to register', 'kivabe form fillup korbo', 'registration steps', 'registration procedure', 'register korbo', 'event register', 'event e kivabe register'],
+    patternsEn: ['how to register', 'how can i register', 'ow can i register', 'register for event', 'event registration', 'how do i register', 'registration process', 'how to join', 'how to sign up', 'registration steps', 'apply for event', 'register for competition', 'registration', 'how can i participate', 'how do i participate']
   },
 
   // 34. Fees and Payment General

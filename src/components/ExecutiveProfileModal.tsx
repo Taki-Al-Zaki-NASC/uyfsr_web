@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { DEPARTMENTS } from '../lib/departments'
 import { X, Upload, Save, User, Calendar, Phone, Mail, Building2, Lock } from 'lucide-react'
 import { toast } from 'sonner'
 import { sounds } from '../lib/audio'
@@ -188,12 +189,15 @@ export const ExecutiveProfileModal: React.FC<ExecutiveProfileModalProps> = ({
               <label className="block text-[12px] font-semibold text-[#111111] mb-1">Department</label>
               <div className="relative">
                 <Building2 className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#2b2b28]/60" />
-                <input
-                  type="text"
+                <select
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
                   className="w-full pl-8 pr-3 py-2 text-[13.5px] bg-[#f7f7f5] border border-[#dcdcd8] focus:border-[#0c7866] outline-none"
-                />
+                >
+                  {(DEPARTMENTS.includes(department) ? DEPARTMENTS : [department, ...DEPARTMENTS]).map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
               </div>
             </div>
 

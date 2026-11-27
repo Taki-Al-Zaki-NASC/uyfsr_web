@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { DEPARTMENTS } from '../lib/departments'
 import {
   ArrowLeft,
   ShieldCheck,
@@ -947,14 +948,17 @@ export const ExecutiveLoginPage: React.FC<ExecutiveLoginPageProps> = ({
                         <label className="block text-[12.5px] font-medium text-[#111111] mb-1">Department *</label>
                         <div className="relative">
                           <Building2 className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#2b2b28]/60" />
-                          <input
-                            type="text"
+                          <select
                             required
-                            placeholder="e.g. Research & Publications"
                             value={regDepartment}
                             onChange={(e) => setRegDepartment(e.target.value)}
                             className="w-full pl-8 pr-3 py-2 text-[13.5px] bg-[#f7f7f5] border border-[#ecece9] focus:border-[#0c7866] outline-none"
-                          />
+                          >
+                            <option value="">Select department</option>
+                            {DEPARTMENTS.map((d) => (
+                              <option key={d} value={d}>{d}</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
                     </div>

@@ -115,7 +115,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }}
             className="h-10 px-3 sm:px-5 flex items-center justify-center bg-[#0c7866] hover:bg-[#095f51] text-white font-medium text-[13px] sm:text-[14px] transition-colors cursor-pointer shrink-0 whitespace-nowrap"
           >
-            Join the forum
+            Join the Event
           </button>
 
           {/* Far-Right: Clean circular avatar matching the exact button height (40px) */}

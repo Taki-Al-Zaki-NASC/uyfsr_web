@@ -1617,10 +1617,28 @@ app.post('/api/submissions/:id/reject', async (req: Request, res: Response) => {
 // 6. LIVE MESSAGING & MEETING SCHEDULER MODULE
 // ==========================================
 
+const INQUIRY_CHANNEL = 'CEO Inquiries'
+
+// CEO ONLY: Public contact-form inquiries inbox
+app.get('/api/inquiries', async (req: Request, res: Response) => {
+  const officer = await getAuthOfficer(req)
+  if (!officer) return res.status(401).json({ error: 'Authentication required.' })
+  if (!officer.isCEO) {
+    return res.status(403).json({ error: 'Permission Denied: Public inquiries are visible to the CEO only.' })
+  }
+  const messages = await db.get('messages')
+  const inquiries = messages.filter((m) => (m.channel || '').toLowerCase() === INQUIRY_CHANNEL.toLowerCase())
+  return res.json({ inquiries: inquiries.slice().reverse() })
+})
+
 // Get Messages
 app.get('/api/messages', async (req: Request, res: Response) => {
   const reqChannel = (req.query.channel as string || '').trim().toLowerCase()
-  const messages = await db.get('messages')
+  const viewer = await getAuthOfficer(req)
+  // Public contact-form inquiries are confidential: visible to the CEO only
+  const messages = (await db.get('messages')).filter(
+    (m) => (m.channel || '').toLowerCase() !== INQUIRY_CHANNEL.toLowerCase() || !!viewer?.isCEO
+  )
   if (!reqChannel || reqChannel === 'all') {
     return res.json({ messages })
   }
@@ -1684,25 +1702,27 @@ app.post('/api/contact', publicFormLimiter, async (req: Request, res: Response) 
       id: `msg-${Date.now()}`,
       senderName: `${name.trim()} (${contact.trim()})`,
       senderRole: 'Public Inquiry',
-      channel: 'general',
+      channel: INQUIRY_CHANNEL,
       message: message.trim(),
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      timestamp: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
     }
 
     await db.insert('messages', chatMsg)
+    const ceo = (await db.get('executives')).find((e) => e.isCEO && e.status !== 'pending' && e.status !== 'rejected')
 
     // Trigger automated email alert to uyfsr.org@gmail.com and visitor acknowledgment
     sendContactInquiryEmail({
       name: name.trim(),
       contact: contact.trim(),
-      message: message.trim()
+      message: message.trim(),
+      ceoEmail: (ceo as any)?.email
     }).catch((err) => {
       console.error('[EMAIL DISPATCH ERROR] Contact inquiry email failed:', err)
     })
 
     return res.status(201).json({
       success: true,
-      message: 'Your message has been received by the Secretariat. We will respond soon via uyfsr.org@gmail.com.'
+      message: 'Your message has been delivered to the Chief Executive Officer. We will respond soon via uyfsr.org@gmail.com.'
     })
   } catch (err: any) {
     return res.status(500).json({ error: 'Failed to process inquiry.' })

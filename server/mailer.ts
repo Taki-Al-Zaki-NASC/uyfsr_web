@@ -634,7 +634,7 @@ CENTRAL SECRETARIAT CONTACT:
  * 2. Public Contact Inquiry Notification + Visitor Acknowledgment
  * Matches website warm ivory #f7f7f5 theme & editorial typography
  */
-export async function sendContactInquiryEmail(inquiry: { name: string; contact: string; message: string }) {
+export async function sendContactInquiryEmail(inquiry: { name: string; contact: string; message: string; ceoEmail?: string }) {
   const isEmail = inquiry.contact.includes('@')
   const replyTo = isEmail ? inquiry.contact.trim() : undefined
 
@@ -730,7 +730,7 @@ Central Secretariat: uyfsr.org@gmail.com
 `.trim()
 
   const secretariatNotice = await sendEmail({
-    to: OFFICIAL_EMAIL,
+    to: inquiry.ceoEmail ? [inquiry.ceoEmail, OFFICIAL_EMAIL] : OFFICIAL_EMAIL,
     replyTo,
     subject,
     text,

@@ -778,3 +778,20 @@ export async function apiUpdateSiteContent(
     news: any[]
   }>
 }
+
+export interface InquiryItem {
+  id: string
+  senderName: string
+  message: string
+  timestamp: string
+}
+
+export async function apiGetInquiries(officerName?: string): Promise<InquiryItem[]> {
+  const res = await fetch(`${BASE_URL}/inquiries`, { headers: getAuthHeaders(officerName) })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Failed to load inquiries' }))
+    throw new Error(err.error || 'Failed to load inquiries')
+  }
+  const data = await res.json()
+  return (data.inquiries || []) as InquiryItem[]
+}

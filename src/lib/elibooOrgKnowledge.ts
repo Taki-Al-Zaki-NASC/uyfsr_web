@@ -725,7 +725,39 @@ export const UYFSR_ORG_KNOWLEDGE_ITEMS: OrgKnowledgeItem[] = [
     actionLink: { label: 'Register for Upcoming Events', href: '#register', view: 'register' }
   },
 
-  // --- R. BKASH & NAGAD PAYMENT GATEWAY ---
+  // --- R. EVENT REGISTRATION & APPLICATION (HOW TO REGISTER) ---
+  {
+    keys: [
+      'how to register', 'how can i register', 'ow can i register', 'register for event', 'event registration',
+      'how do i register', 'registration process', 'how can i join', 'register kivabe korbo',
+      'kivabe register korbo', 'kivabe join korbo', 'registration steps', 'apply for event',
+      'registration procedure', 'how to sign up', 'participate in event', 'partisipet kivabe korbo',
+      'কীভাবে রেজিস্ট্রেশন করব', 'রেজিস্ট্রেশনের নিয়ম', 'রেজিস্ট্রেশন করার নিয়ম', 'ইভেন্ট রেজিস্ট্রেশন',
+      'আবেদন করার নিয়ম', 'অংশগ্রহণ করার নিয়ম', 'রেজিস্ট্রেশন করতে চাই'
+    ],
+    topic: 'registration',
+    bn: `📝 **UYFSR প্রতিযোগিতায় রেজিস্ট্রেশনের সহজ ৪টি ধাপ:**\n\n` +
+      `১. **প্রোগ্রাম নির্বাচন:** আমাদের ওয়েবসাইটের Registration পেজে গিয়ে আপনি যে ইভেন্ট বা অলিম্পিয়াডে অংশ নিতে চান তা নির্বাচন করুন (যেমন: National Science Eclipse 2026, Junior Talent Award ইত্যাদি)।\n` +
+      `২. **ব্যক্তিগত তথ্য পূরণ:** আপনার পূর্ণ নাম, সক্রিয় ইমেইল, ১১ ডিজিটের মোবাইল নম্বর এবং স্কুল/কলেজ/বিশ্ববিদ্যালয়ের তথ্য প্রদান করুন।\n` +
+      `৩. **রেজিস্ট্রেশন ফি ও ভাউচার:** কোনো এক্সিকিউটিভ রেফারেল ভাউচার থাকলে (যেমন: \`UYFSR-REF-MBJ2026\`) ইনপুট দিলে রেজিস্ট্রেশন ফিতে **২০% নিশ্চিত ছাড়** পাবেন।\n` +
+      `৪. **বিকাশ বা নগদ পেমেন্ট:** অফিসিয়াল bKash / Nagad Personal নম্বর \`01911287501\`-এ Send Money করে ফিরতি মেসেজের **TrxID (Transaction ID)** ফর্মে বসিয়ে সাবমিট করুন।\n\n` +
+      `সাবমিট করার সাথে সাথেই আপনি অফিসিয়াল কনফার্মেশন ও ট্র্যাকিং ই-ব্যাজ পেয়ে যাবেন!`,
+    banglish: `📝 **UYFSR Event Registration Steps (সহজ নিয়ম):**\n\n` +
+      `1. **Event Select:** Registration page-e giye apnar target event (Science Eclipse 2026 / Olympiad) select korun.\n` +
+      `2. **Information Fillup:** Name, email, mobile number ebong educational institution form-e puron korun.\n` +
+      `3. **Voucher Discount:** Kono referral voucher (e.g. \`UYFSR-REF-MBJ2026\`) thakle apply korun (instant 20% discount paben!).\n` +
+      `4. **bKash/Nagad Payment:** Official Personal number \`01911287501\`-e Send Money kore TrxID fild-e bosiye Submit korun!\n\n` +
+      `Instant registration confirmation & digital credential peye jaben!`,
+    en: `📝 **Official 4-Step Registration Guide for UYFSR Programs:**\n\n` +
+      `1. **Select Program:** Visit the Registration portal and choose your event (e.g. National Science Eclipse 2026, Junior Talent Award, Olympiads).\n` +
+      `2. **Submit Credentials:** Enter your full name, verified email, 11-digit mobile number, and educational institution.\n` +
+      `3. **Redeem Executive Voucher:** Apply any verified voucher code (e.g. \`UYFSR-REF-MBJ2026\`) to trigger an immediate **20% registration fee discount**.\n` +
+      `4. **Remit via bKash / Nagad:** Send Money to official personal account \`01911287501\`, input the 10-character **TrxID**, and submit.\n\n` +
+      `You will receive immediate cryptographic confirmation credentials and your official participant badge!`,
+    actionLink: { label: 'Register for 2026 Events', href: '#register', view: 'register' }
+  },
+
+  // --- S. BKASH & NAGAD PAYMENT GATEWAY ---
   {
     keys: [
       'bkash number', '01911287501', 'nagad number', 'payment number', 'বিকাশ নম্বর',
@@ -782,7 +814,7 @@ export const UYFSR_ORG_KNOWLEDGE_ITEMS: OrgKnowledgeItem[] = [
   // --- T. CAMPUS AMBASSADOR (COMPLETE DETAILS & BENEFITS) ---
   {
     keys: [
-      'campus ambassador', 'ambassador', 'ca', 'অ্যাম্বাসেডর', 'ক্যাম্পাস অ্যাম্বাসেডর',
+      'campus ambassador', 'ambassador', 'ca program', 'ca application', 'become ca', 'অ্যাম্বাসেডর', 'ক্যাম্পাস অ্যাম্বাসেডর',
       'ambassador ki free', 'ambassador fee', 'is ambassador free', 'ca perks', 'ambassador labh'
     ],
     topic: 'ambassador',
@@ -1045,8 +1077,18 @@ export function matchOrgKnowledge(query: string): OrgKnowledgeItem | null {
   }
 
   // 3. Direct check against all items in UYFSR_ORG_KNOWLEDGE_ITEMS
+  const qWords = qClean.split(/[\s,?.!;:()\[\]"'/\\-]+/).filter(Boolean)
+
   for (const item of UYFSR_ORG_KNOWLEDGE_ITEMS) {
-    if (item.keys.some((k) => qClean.includes(k.toLowerCase()))) {
+    const isMatched = item.keys.some((rawKey) => {
+      const k = rawKey.toLowerCase().trim()
+      if (k.length <= 4) {
+        // Short tokens (e.g. "coo", "cto", "fee", "bkash") MUST match as a whole word to avoid false positives (e.g. "can" matching "ca")
+        return qWords.includes(k)
+      }
+      return qClean.includes(k)
+    })
+    if (isMatched) {
       return item
     }
   }
