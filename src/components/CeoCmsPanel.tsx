@@ -16,7 +16,10 @@ import {
   UserCheck,
   Mail,
   Phone,
-  RefreshCw
+  RefreshCw,
+  Sliders,
+  ToggleLeft,
+  ToggleRight
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { sounds } from '../lib/audio'
@@ -33,7 +36,8 @@ import {
   type SiteEventItem,
   type SitePartnerItem,
   type SiteFaqItem,
-  type ExecutiveProfileData
+  type ExecutiveProfileData,
+  type SiteTrackConfig
 } from '../lib/api'
 import { compressImageFile } from '../lib/imageUtils'
 
@@ -48,7 +52,7 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
   onSiteContentUpdated,
   onExecutiveApproved
 }) => {
-  const [subTab, setSubTab] = useState<'approvals' | 'inquiries' | 'events' | 'partners' | 'hero' | 'faqs'>('approvals')
+  const [subTab, setSubTab] = useState<'approvals' | 'inquiries' | 'tracks' | 'events' | 'partners' | 'hero' | 'faqs'>('approvals')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -115,6 +119,16 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
   }
 
   // Publish Site Content to Backend
+  
+  const updateTrack = (id: string, patch: Partial<SiteTrackConfig>) => {
+    if (!content) return
+    const currentTracks = content.tracks || []
+    setContent({
+      ...content,
+      tracks: currentTracks.map((t) => (t.id === id ? { ...t, ...patch } : t))
+    })
+  }
+
   const handlePublish = async () => {
     if (!content) return
     setSaving(true)
@@ -322,6 +336,19 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
 
         <button
           type="button"
+          onClick={() => setSubTab('tracks')}
+          className={`px-3.5 py-2 text-[13px] font-medium cursor-pointer inline-flex items-center gap-1.5 transition-colors ${
+            subTab === 'tracks'
+              ? 'bg-[#111111] text-white'
+              : 'bg-[#ecece9] text-[#2b2b28] hover:text-[#111111]'
+          }`}
+        >
+          <Sliders className="w-3.5 h-3.5" />
+          <span>Tracks & Workshops (5)</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => setSubTab('events')}
           className={`px-3.5 py-2 text-[13px] font-medium cursor-pointer inline-flex items-center gap-1.5 transition-colors ${
             subTab === 'events'
@@ -513,6 +540,108 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ================================================================= */}
+      {/* SUB-TAB: TRACKS & WORKSHOPS FEATURE CONTROL (CEO ON/OFF TOGGLE)   */}
+      {/* ================================================================= */}
+      {subTab === 'tracks' && content && (
+        <div className="space-y-5">
+          <div>
+            <h3 className="font-serif text-lg font-semibold text-[#111111]">
+              Core Tracks & Practical Workshop Controls (5)
+            </h3>
+            <p className="text-[12.5px] text-[#2b2b28]/70">
+              Toggle track registration ON or OFF. When OFF, visitors clicking the track see an official notice that no upcoming sessions are scheduled.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {(content.tracks || []).map((t) => (
+              <div
+                key={t.id}
+                className={`bg-white border p-5 transition-all space-y-4 ${
+                  t.isOpen ? 'border-[#0c7866]/40 shadow-xs' : 'border-[#dcdcd8] opacity-90'
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#ecece9] pb-3">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xs font-bold px-2 py-0.5 bg-[#111111] text-white">
+                      Track {t.num}
+                    </span>
+                    <h4 className="font-serif text-base font-bold text-[#111111]">{t.title}</h4>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sounds.playClick()
+                      updateTrack(t.id, { isOpen: !t.isOpen })
+                    }}
+                    className={`px-3 py-1.5 text-xs font-bold cursor-pointer inline-flex items-center gap-2 rounded-full transition-colors ${
+                      t.isOpen
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200'
+                        : 'bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200'
+                    }`}
+                  >
+                    {t.isOpen ? (
+                      <>
+                        <ToggleRight className="w-4 h-4 text-emerald-600" />
+                        <span>ACTIVE · Registration Open</span>
+                      </>
+                    ) : (
+                      <>
+                        <ToggleLeft className="w-4 h-4 text-amber-600" />
+                        <span>CLOSED · No Upcoming Sessions</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-[#2b2b28] mb-1">
+                      Active Cohort / Session Title
+                    </label>
+                    <input
+                      type="text"
+                      value={t.sessionTitle || ''}
+                      onChange={(e) => updateTrack(t.id, { sessionTitle: e.target.value })}
+                      placeholder="e.g. Hands-on Laboratory Methodology Clinic"
+                      className="w-full px-3 py-2 text-xs bg-[#f7f7f5] border border-[#dcdcd8] text-[#111111] focus:border-[#0c7866] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-[#2b2b28] mb-1">
+                      Enrolment Fee Badge
+                    </label>
+                    <input
+                      type="text"
+                      value={t.fee || ''}
+                      onChange={(e) => updateTrack(t.id, { fee: e.target.value })}
+                      placeholder="e.g. ৳250 BDT or 100% Free"
+                      className="w-full px-3 py-2 text-xs bg-[#f7f7f5] border border-[#dcdcd8] text-[#111111] focus:border-[#0c7866] outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-[#2b2b28] mb-1">
+                    Notice Details (Displayed to applicants on modal)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={t.notice || ''}
+                    onChange={(e) => updateTrack(t.id, { notice: e.target.value })}
+                    placeholder="Notice shown to applicants regarding schedule, eligibility, or why registration is currently closed..."
+                    className="w-full px-3 py-2 text-xs bg-[#f7f7f5] border border-[#dcdcd8] text-[#111111] focus:border-[#0c7866] outline-none resize-none"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

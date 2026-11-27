@@ -1,4 +1,6 @@
 import React, { useState, useRef } from 'react'
+import { TrackModal } from './TrackModal'
+import type { SiteTrackConfig } from '../lib/api'
 import { sounds } from '../lib/audio'
 import {
   ArrowRight,
@@ -111,13 +113,39 @@ const getIcon = (id: string) => {
 
 interface TracksProps {
   onOpenJoin?: () => void
+  tracksConfig?: SiteTrackConfig[]
 }
 
-export const Tracks: React.FC<TracksProps> = ({ onOpenJoin }) => {
+export const Tracks: React.FC<TracksProps> = ({ onOpenJoin: _onOpenJoin, tracksConfig }) => {
+  const [modalTrack, setModalTrack] = useState<(SiteTrackConfig & { category?: string; description?: string; highlights?: string[] }) | null>(null)
   const [activeIndex, setActiveIndex] = useState<number>(0)
   const [slideDirection, setSlideDirection] = useState<'right' | 'left'>('right')
   const [viewEffect, setViewEffect] = useState<'slider' | 'stack'>('slider')
   const touchStartX = useRef<number | null>(null)
+
+  
+  const getTrackConfig = (id: string) => {
+    return tracksConfig?.find((t) => t.id === id) || {
+      id,
+      num: activities.find((a) => a.id === id)?.num || '01',
+      title: activities.find((a) => a.id === id)?.title || 'Track',
+      isOpen: id === 'workshops' || id === 'fairs-olympiads' || id === 'youth-development',
+      sessionTitle: activities.find((a) => a.id === id)?.flagship,
+      notice: activities.find((a) => a.id === id)?.description,
+      fee: id === 'youth-development' ? 'Free' : '৳250 BDT'
+    }
+  }
+
+  const handleOpenTrack = (act: ActivityItem) => {
+    sounds.playClick()
+    const cfg = getTrackConfig(act.id)
+    setModalTrack({
+      ...cfg,
+      category: act.category,
+      description: act.description,
+      highlights: act.highlights
+    })
+  }
 
   const activeActivity = activities[activeIndex]
   const Icon = getIcon(activeActivity.id)
@@ -272,19 +300,37 @@ export const Tracks: React.FC<TracksProps> = ({ onOpenJoin }) => {
                   </div>
 
                   {/* Call to Action Button */}
-                  <div className="pt-4 border-t border-[#f0f0ed] flex items-center gap-3">
-                    {onOpenJoin && (
-                      <button
-                        onClick={() => {
-                          sounds.playClick()
-                          onOpenJoin()
-                        }}
-                        className="px-4.5 py-2.5 bg-[#111111] hover:bg-[#0c7866] text-white text-[13px] font-medium transition-colors cursor-pointer inline-flex items-center gap-2 rounded-xs shadow-xs"
-                      >
-                        <span>Participate in {activeActivity.title}</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
-                    )}
+                  <div className="pt-4 border-t border-[#f0f0ed] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenTrack(activeActivity)}
+                      className={`w-full sm:w-auto px-5 py-3 text-white text-[13.5px] font-semibold transition-colors cursor-pointer inline-flex items-center justify-center gap-2 rounded-xs shadow-xs ${
+                        getTrackConfig(activeActivity.id).isOpen
+                          ? 'bg-[#111111] hover:bg-[#0c7866]'
+                          : 'bg-neutral-800 hover:bg-neutral-900 border border-amber-500/40 text-amber-300'
+                      }`}
+                    >
+                      <span>
+                        {getTrackConfig(activeActivity.id).isOpen
+                          ? `Enrol in ${activeActivity.title}`
+                          : `Check ${activeActivity.title} Status`}
+                      </span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+
+                    <div className="text-left sm:text-right">
+                      {getTrackConfig(activeActivity.id).isOpen ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11.5px] font-semibold rounded-xs">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span>Active · Registration Open</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200 text-[11.5px] font-semibold rounded-xs">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                          <span>No Upcoming Sessions</span>
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -437,6 +483,17 @@ export const Tracks: React.FC<TracksProps> = ({ onOpenJoin }) => {
           </div>
         )}
 
+        {/* Track Enrolment & Inactive Notice Modal */}
+        {modalTrack && (
+          <TrackModal
+            track={modalTrack}
+            onClose={() => setModalTrack(null)}
+            onExploreEvents={() => {
+              setModalTrack(null)
+              document.getElementById('events')?.scrollIntoView({ behavior: 'smooth' })
+            }}
+          />
+        )}
       </div>
     </section>
   )

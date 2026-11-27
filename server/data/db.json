@@ -679,6 +679,53 @@
         "a": "We actively collaborate with educational institutions, campus media clubs, and partner organizations as co-organizers, workshop partners, and venue hosts, working alongside partners like TWIMBOL, KIDLON, MEJOLOGY, and Adamjee School Communication Club.",
         "category": "About UYFSR"
       }
+    ],
+    "tracks": [
+      {
+        "id": "workshops",
+        "num": "01",
+        "title": "Practical Workshops",
+        "isOpen": true,
+        "sessionTitle": "Hands-on Experimental Methodology Clinic",
+        "notice": "Weekend laboratory apparatus handling, titration techniques, and empirical data verification.",
+        "fee": "৳250 BDT"
+      },
+      {
+        "id": "seminars-sessions",
+        "num": "02",
+        "title": "Seminars & Expert Talks",
+        "isOpen": false,
+        "sessionTitle": "University Faculty Mentorship Series",
+        "notice": "Currently, no expert seminars are open for registration. Next cohort opens in April 2026.",
+        "fee": "Free Admission"
+      },
+      {
+        "id": "fairs-olympiads",
+        "num": "03",
+        "title": "Science Fairs & Olympiads",
+        "isOpen": true,
+        "sessionTitle": "National Science Eclipse 2026 Olympiads",
+        "notice": "Multi-disciplinary Olympiad in Physics, Chemistry, Biology & Math with verified credentials.",
+        "fee": "৳350 BDT"
+      },
+      {
+        "id": "scientific-competitions",
+        "num": "04",
+        "title": "Quiz & Problem-Solving",
+        "isOpen": false,
+        "sessionTitle": "National Inter-College Science Quiz Tournament",
+        "notice": "Registration for this track is currently closed. Follow our page for the Season 2 announcement.",
+        "fee": "৳150 BDT"
+      },
+      {
+        "id": "youth-development",
+        "num": "05",
+        "title": "Youth Leadership & Mentorship",
+        "isOpen": true,
+        "sessionTitle": "Campus Ambassador & Scientific Leadership Cohort",
+        "notice": "Leadership credentials and campus science club organization mentorship.",
+        "fee": "100% Free"
+      }
     ]
   }
 }

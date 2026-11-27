@@ -744,12 +744,23 @@ export interface SiteMissionVisionData {
   visionText: string
 }
 
+export interface SiteTrackConfig {
+  id: string
+  num: string
+  title: string
+  isOpen: boolean
+  sessionTitle?: string
+  notice?: string
+  fee?: string
+}
+
 export interface SiteContentData {
   hero: SiteHeroData
   missionVision: SiteMissionVisionData
   events: SiteEventItem[]
   partners: SitePartnerItem[]
   faqs: SiteFaqItem[]
+  tracks?: SiteTrackConfig[]
 }
 
 export async function apiGetSiteContent() {

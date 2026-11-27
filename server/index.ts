@@ -609,7 +609,7 @@ app.put('/api/site-content', async (req: Request, res: Response) => {
     }
 
     const current = await db.getSiteContent()
-    const { hero, missionVision, events, partners, faqs, news } = req.body as Partial<SiteContent> & { news?: any[] }
+    const { hero, missionVision, events, partners, faqs, tracks, news } = req.body as Partial<SiteContent> & { news?: any[] }
 
     const updated: SiteContent = {
       hero: hero ? { ...current.hero, ...hero } : current.hero,
@@ -621,7 +621,8 @@ app.put('/api/site-content', async (req: Request, res: Response) => {
             logo: isSafeImageSource(p?.logo) ? p.logo.trim() : '/images/partners/twimbol.png'
           }))
         : current.partners,
-      faqs: Array.isArray(faqs) ? faqs : current.faqs
+      faqs: Array.isArray(faqs) ? faqs : current.faqs,
+      tracks: Array.isArray(tracks) ? tracks : current.tracks
     }
 
     await db.setSiteContent(updated)
