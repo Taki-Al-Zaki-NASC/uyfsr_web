@@ -110,7 +110,7 @@ app.use('/api', generalApiLimiter)
 // ==========================================
 // CRYPTOGRAPHIC SESSION TOKEN STORE & HELPERS
 // ==========================================
-const SESSION_SECRET = process.env.SESSION_SECRET || 'uyfsr_secret_passkey_recovery_2026'
+const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex')
 
 interface ActiveSession {
   officerId: string
@@ -282,11 +282,10 @@ app.post('/api/auth/login', loginLimiter, async (req: Request, res: Response) =>
       })
     }
 
-    // Strict Password / PIN Verification with Timing-Safe Comparison
-    const pinMatches = officer.accessPin && safeCompare(officer.accessPin.toLowerCase(), loginPass.toLowerCase())
+    // Strict Confidential Password Verification with Timing-Safe Comparison (Easy PIN bypass removed)
     const passwordMatches = (officer as any).password && safeCompare((officer as any).password, loginPass)
 
-    if (!pinMatches && !passwordMatches) {
+    if (!passwordMatches) {
       return res.status(401).json({
         error: `Incorrect security passkey/PIN for ${officer.name}. Access denied.`
       })
@@ -353,6 +352,9 @@ app.post('/api/auth/executive-register', publicFormLimiter, async (req: Request,
     }
     if (!cleanDob) {
       return res.status(400).json({ error: 'Please provide your Date of Birth.' })
+    }
+    if (!photo || typeof photo !== 'string' || !isSafeImageSource(photo)) {
+      return res.status(400).json({ error: 'Official executive profile photo is mandatory to complete registration.' })
     }
     if (!cleanPass || cleanPass.length < 6) {
       return res.status(400).json({ error: 'Password must be at least 6 characters long.' })
@@ -656,7 +658,7 @@ function maskEmail(email?: string): string {
   return `${visiblePrefix}${'*'.repeat(Math.max(2, user.length - 3))}${visibleSuffix}@${domain}`
 }
 
-const RESET_SECRET = process.env.SESSION_SECRET || 'uyfsr_secret_passkey_recovery_2026'
+const RESET_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex')
 
 function generateResetHmac(officerId: string, otpCode: string, expiresAt: number): string {
   return crypto

@@ -27,7 +27,7 @@ interface RegistrationPageProps {
   onOpenAmbassador?: () => void
 }
 
-export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onBackToHome, onOpenAmbassador }) => {
+export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onBackToHome, onOpenAmbassador: _onOpenAmbassador }) => {
   const [step, setStep] = useState<'details' | 'payment' | 'success'>('details')
   const [formData, setFormData] = useState({
     name: '',
@@ -126,33 +126,6 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onBackToHome
     }
 
     sounds.playClick()
-
-    if (formData.program.includes('Ambassador')) {
-      if (onOpenAmbassador) {
-        onOpenAmbassador()
-        return
-      }
-      setIsSubmitting(true)
-      apiRegisterStudent({
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        phone: formData.phone.trim() || undefined,
-        institution: formData.institution.trim() || 'Independent Scholar',
-        program: 'Campus Ambassador Programme',
-        notes: formData.notes,
-        mfsMethod: 'free_ambassador',
-        mfsTrxId: 'FREE_AMBASSADOR'
-      }).then((res) => {
-        setServerTrackingId(res.trackingId)
-        sounds.playSuccess()
-        setStep('success')
-      }).catch((e: any) => {
-        toast.error(e.message || 'Failed to submit ambassador nomination')
-      }).finally(() => {
-        setIsSubmitting(false)
-      })
-      return
-    }
 
     // Pre-fill MFS phone with the applicant's contact phone if provided
     if (formData.phone.trim() && !mfsPhone) {
@@ -488,22 +461,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onBackToHome
                           <option value="Junior Talent Award – Season 1">Junior Talent Award – Season 1</option>
                           <option value="Junior Startup Challenge">Junior Startup Challenge</option>
                           <option value="Research Methodology Workshops">Research Methodology Workshops</option>
-                          <option value="Campus Ambassador / Youth Volunteer">Campus Ambassador / Youth Volunteer (100% Free)</option>
                         </select>
-                        {formData.program.includes('Ambassador') && (
-                          <div className="mt-2.5 p-3 bg-[#0c7866]/10 border border-[#0c7866]/20 text-[#064e43] text-[12.5px] flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-xs">
-                            <span><strong>Campus Ambassador is 100% Free!</strong> Zero fees or payment required.</span>
-                            {onOpenAmbassador && (
-                              <button
-                                type="button"
-                                onClick={onOpenAmbassador}
-                                className="px-2.5 py-1 bg-[#0c7866] hover:bg-[#064e43] text-white text-[11.5px] font-semibold transition-colors cursor-pointer shrink-0 rounded-xs"
-                              >
-                                Dedicated Ambassador Form &rarr;
-                              </button>
-                            )}
-                          </div>
-                        )}
                       </div>
                     </div>
 
@@ -543,7 +501,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onBackToHome
                         disabled={isSubmitting}
                         className="w-full py-3.5 bg-[#0c7866] hover:bg-[#095f51] text-white text-[14px] font-medium transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
                       >
-                        <span>{isSubmitting ? 'Registering with Council...' : formData.program.includes('Ambassador') ? 'Submit Free Ambassador Nomination (৳0 BDT)' : voucherApplied ? 'Proceed to Discounted Fee (৳280 BDT · 20% OFF)' : 'Proceed to Registration Fee (৳350 BDT)'}</span>
+                        <span>{isSubmitting ? 'Registering with Council...' : voucherApplied ? 'Proceed to Discounted Fee (৳280 BDT · 20% OFF)' : 'Proceed to Registration Fee (৳350 BDT)'}</span>
                         <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>
