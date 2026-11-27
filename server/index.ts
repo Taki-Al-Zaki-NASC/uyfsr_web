@@ -186,7 +186,12 @@ async function getAuthOfficer(req: Request): Promise<Executive | null> {
     // 1. Check in-memory active sessions
     const session = activeSessions.get(token)
     if (session && session.expiresAt > Date.now()) {
-      return executives.find((e) => e.id === session.officerId) || null
+      const found = executives.find((e) => e.id === session.officerId) || null
+      if (found && (found.status === 'deactivated' || found.status === 'suspended')) {
+        activeSessions.delete(token)
+        return null
+      }
+      return found
     }
 
     // 2. Check cryptographic HMAC-signed token
@@ -194,6 +199,10 @@ async function getAuthOfficer(req: Request): Promise<Executive | null> {
     if (verified) {
       const found = executives.find((e) => e.id === verified.officerId)
       if (found) {
+        if (found.status === 'deactivated' || found.status === 'suspended') {
+          activeSessions.delete(token)
+          return null
+        }
         activeSessions.set(token, {
           officerId: found.id,
           officerName: found.name,
@@ -208,14 +217,14 @@ async function getAuthOfficer(req: Request): Promise<Executive | null> {
     // 3. Fallback: If token is mock_jwt
     if (token.startsWith('mock_jwt_')) {
       const decodedName = decodeURIComponent(token.slice('mock_jwt_'.length)).trim().toLowerCase()
-      const found = executives.find(e => e.name.toLowerCase() === decodedName && e.status !== 'pending' && e.status !== 'rejected')
+      const found = executives.find(e => e.name.toLowerCase() === decodedName && e.status !== 'pending' && e.status !== 'rejected' && e.status !== 'deactivated' && e.status !== 'suspended')
       if (found) return found
     }
   }
 
   const officerHeader = (req.headers['x-officer-name'] as string)?.trim().toLowerCase()
   if (officerHeader) {
-    const found = executives.find(e => e.name.toLowerCase() === officerHeader && e.status !== 'pending' && e.status !== 'rejected')
+    const found = executives.find(e => e.name.toLowerCase() === officerHeader && e.status !== 'pending' && e.status !== 'rejected' && e.status !== 'deactivated' && e.status !== 'suspended')
     if (found) return found
   }
 
@@ -283,6 +292,11 @@ app.post('/api/auth/login', loginLimiter, async (req: Request, res: Response) =>
     if (officer.status === 'rejected') {
       return res.status(403).json({
         error: 'Your executive account application was declined by the Executive Council.'
+      })
+    }
+    if (officer.status === 'deactivated' || (officer as any).status === 'suspended') {
+      return res.status(403).json({
+        error: 'Your executive account has been deactivated by the Chief Executive Officer. Access suspended.'
       })
     }
 
@@ -452,8 +466,13 @@ app.get('/api/auth/ecard/:cardId', async (req: Request, res: Response) => {
 // Public Executive List (Security Hardened: active only, accessPin and password never exposed)
 app.get('/api/auth/executives', async (_req: Request, res: Response) => {
   const executives = await db.get('executives')
-  const safeList = executives
-    .filter((e) => e.status !== 'pending' && e.status !== 'rejected')
+  const combined = [...globalApprovedExecutives, ...executives]
+  const uniqueMap = new Map<string, Executive>()
+  for (const e of combined) {
+    if (!uniqueMap.has(e.id)) uniqueMap.set(e.id, e)
+  }
+  const safeList = Array.from(uniqueMap.values())
+    .filter((e) => e.status !== 'pending' && e.status !== 'rejected' && e.status !== 'deactivated')
     .map(({ accessPin, password, ...rest }: any) => rest)
   return res.json({ executives: safeList })
 })
@@ -609,6 +628,98 @@ app.post('/api/executives/:id/reject', async (req: Request, res: Response) => {
     })
   } catch (err: any) {
     return res.status(500).json({ error: 'Failed to reject executive account.' })
+  }
+})
+
+// CEO ONLY: Full Council Roster (All Active and Deactivated Executives)
+app.get('/api/executives/roster', async (req: Request, res: Response) => {
+  try {
+    const officer = await getAuthOfficer(req)
+    if (!officer) return res.status(401).json({ error: 'Authentication required.' })
+    if (!officer.isCEO) {
+      return res.status(403).json({ error: 'Permission Denied: Only the Chief Executive Officer can view the governance roster.' })
+    }
+
+    const executives = await db.get('executives')
+    const combined = [...globalApprovedExecutives, ...executives]
+    const uniqueMap = new Map<string, Executive>()
+    for (const e of combined) {
+      if (!uniqueMap.has(e.id)) {
+        uniqueMap.set(e.id, e)
+      }
+    }
+
+    const roster = Array.from(uniqueMap.values())
+      .filter((e) => e.status !== 'pending' && e.status !== 'rejected')
+      .map(({ accessPin, password, ...rest }: any) => rest)
+
+    return res.json({ roster })
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to fetch executive roster.' })
+  }
+})
+
+// CEO ONLY: Toggle Executive Account Status (Active / Deactivated)
+app.post('/api/executives/:id/status', async (req: Request, res: Response) => {
+  try {
+    const officer = await getAuthOfficer(req)
+    if (!officer) return res.status(401).json({ error: 'Authentication required.' })
+    if (!officer.isCEO) {
+      return res.status(403).json({ error: 'Permission Denied: Only the Chief Executive Officer can deactivate or reactivate executive accounts.' })
+    }
+
+    const { id } = req.params
+    const { status } = req.body || {}
+    if (status !== 'active' && status !== 'deactivated') {
+      return res.status(400).json({ error: 'Invalid status. Permitted values: "active" or "deactivated".' })
+    }
+
+    const executives = await db.get('executives')
+    const target = executives.find(e => e.id === id) || globalApprovedExecutives.find(e => e.id === id)
+
+    if (!target) {
+      return res.status(404).json({ error: 'Executive member not found.' })
+    }
+
+    if (target.isCEO && status === 'deactivated') {
+      return res.status(400).json({ error: 'Chief Executive Officer account cannot be deactivated.' })
+    }
+
+    let updatedExec: Executive | null = null
+    await db.update(
+      'executives',
+      (e) => e.id === id,
+      (e) => {
+        e.status = status
+        updatedExec = { ...e }
+      }
+    )
+
+    // Synchronize in-memory globalApprovedExecutives
+    const gItem = globalApprovedExecutives.find(e => e.id === id)
+    if (gItem) {
+      gItem.status = status
+      if (!updatedExec) updatedExec = { ...gItem }
+    }
+
+    // If deactivated, immediately terminate active sessions for this officer
+    if (status === 'deactivated') {
+      for (const [token, sess] of activeSessions.entries()) {
+        if (sess.officerId === id) {
+          activeSessions.delete(token)
+        }
+      }
+    }
+
+    const safeTarget = updatedExec || { ...target, status }
+    const { accessPin, password, ...safeExec } = safeTarget as any
+    return res.json({
+      success: true,
+      message: `Executive ${safeExec.name} has been ${status === 'active' ? 'reactivated' : 'deactivated'}.`,
+      executive: safeExec
+    })
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to update executive status.' })
   }
 })
 

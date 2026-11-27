@@ -29,6 +29,8 @@ import {
   apiGetPendingExecutives,
   apiApproveExecutive,
   apiRejectExecutive,
+  apiGetCouncilRoster,
+  apiUpdateExecutiveStatus,
   apiGetInquiries,
   apiDeleteMessage,
   type InquiryItem,
@@ -52,7 +54,7 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
   onSiteContentUpdated,
   onExecutiveApproved
 }) => {
-  const [subTab, setSubTab] = useState<'approvals' | 'inquiries' | 'tracks' | 'events' | 'partners' | 'hero' | 'faqs'>('approvals')
+  const [subTab, setSubTab] = useState<'approvals' | 'roster' | 'inquiries' | 'tracks' | 'events' | 'partners' | 'hero' | 'faqs'>('approvals')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -61,6 +63,12 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
   const [inquiries, setInquiries] = useState<InquiryItem[]>([])
   const [actionId, setActionId] = useState<string | null>(null)
 
+  // Council roster & governance access
+  const [councilRoster, setCouncilRoster] = useState<ExecutiveProfileData[]>([])
+  const [rosterSearch, setRosterSearch] = useState('')
+  const [rosterFilter, setRosterFilter] = useState<'all' | 'active' | 'deactivated'>('all')
+  const [togglingId, setTogglingId] = useState<string | null>(null)
+
   // Editable site content
   const [content, setContent] = useState<SiteContentData | null>(null)
   const [newsList, setNewsList] = useState<any[]>([])
@@ -68,13 +76,15 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
   const loadAll = async () => {
     setLoading(true)
     try {
-      const [siteRes, pending] = await Promise.all([
+      const [siteRes, pending, roster] = await Promise.all([
         apiGetSiteContent(),
-        apiGetPendingExecutives(officerName).catch(() => [] as ExecutiveProfileData[])
+        apiGetPendingExecutives(officerName).catch(() => [] as ExecutiveProfileData[]),
+        apiGetCouncilRoster(officerName).catch(() => [] as ExecutiveProfileData[])
       ])
       setContent(siteRes.siteContent)
       setNewsList(siteRes.news || [])
       setPendingExecs(pending)
+      setCouncilRoster(roster)
       setInquiries(await apiGetInquiries(officerName).catch(() => [] as InquiryItem[]))
     } catch (err: any) {
       toast.error(err.message || 'Failed to load CMS data.')
@@ -87,6 +97,35 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
     loadAll()
   }, [officerName])
 
+  // CEO Toggle Executive Account Status (Active / Deactivated)
+  const handleToggleExecutiveStatus = async (exec: ExecutiveProfileData, targetStatus: 'active' | 'deactivated') => {
+    if (exec.isCEO) {
+      toast.error('Chief Executive Officer account cannot be deactivated.')
+      return
+    }
+    if (targetStatus === 'deactivated') {
+      const confirmed = window.confirm(
+        `Are you sure you want to DEACTIVATE ${exec.name}? They will immediately lose access to the Executive Workspace and cannot log in until reactivated.`
+      )
+      if (!confirmed) return
+    }
+
+    setTogglingId(exec.id)
+    sounds.playClick()
+    try {
+      const res = await apiUpdateExecutiveStatus(exec.id, targetStatus, officerName)
+      sounds.playSuccess()
+      toast.success(res.message || `${exec.name} status updated to ${targetStatus}.`)
+      setCouncilRoster((prev) =>
+        prev.map((item) => (item.id === exec.id ? { ...item, status: targetStatus } : item))
+      )
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update executive status.')
+    } finally {
+      setTogglingId(null)
+    }
+  }
+
   // CEO Approve / Reject Pending Executive
   const handleApproveExec = async (exec: ExecutiveProfileData) => {
     setActionId(exec.id)
@@ -96,6 +135,9 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
       sounds.playSuccess()
       toast.success(res.message || `${exec.name} approved! Confirmation email sent.`)
       setPendingExecs((prev) => prev.filter((p) => p.id !== exec.id))
+      if (res.executive) {
+        setCouncilRoster((prev) => [res.executive, ...prev.filter(e => e.id !== exec.id)])
+      }
       onExecutiveApproved?.()
     } catch (err: any) {
       toast.error(err.message || 'Approval failed.')
@@ -263,6 +305,25 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
     )
   }
 
+  const filteredRoster = councilRoster.filter((exec) => {
+    const matchesFilter =
+      rosterFilter === 'all'
+        ? true
+        : rosterFilter === 'deactivated'
+        ? exec.status === 'deactivated'
+        : exec.status !== 'deactivated'
+
+    const q = rosterSearch.trim().toLowerCase()
+    if (!q) return matchesFilter
+    return (
+      exec.name.toLowerCase().includes(q) ||
+      (exec.title && exec.title.toLowerCase().includes(q)) ||
+      (exec.department && exec.department.toLowerCase().includes(q)) ||
+      (exec.ecardId && exec.ecardId.toLowerCase().includes(q)) ||
+      (exec.email && exec.email.toLowerCase().includes(q))
+    )
+  })
+
   return (
     <div className="space-y-6 text-left">
       {/* Top Banner & Publish Action */}
@@ -303,6 +364,25 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
 
       {/* Sub-Navigation Pills */}
       <div className="flex flex-wrap items-center gap-2 border-b border-[#ecece9] pb-3">
+        <button
+          type="button"
+          onClick={() => setSubTab('roster')}
+          className={`px-3.5 py-2 text-[13px] font-medium cursor-pointer inline-flex items-center gap-1.5 transition-colors ${
+            subTab === 'roster'
+              ? 'bg-[#111111] text-white'
+              : 'bg-[#ecece9] text-[#2b2b28] hover:text-[#111111]'
+          }`}
+        >
+          <Users className="w-3.5 h-3.5" />
+          <span>Council Roster</span>
+          <span className="ml-1 text-[11px] opacity-75 font-mono">({councilRoster.length})</span>
+          {councilRoster.filter(e => e.status === 'deactivated').length > 0 && (
+            <span className="ml-1 px-1.5 py-0.2 text-[10px] font-bold bg-rose-600 text-white rounded-full">
+              {councilRoster.filter(e => e.status === 'deactivated').length} deactivated
+            </span>
+          )}
+        </button>
+
         <button
           type="button"
           onClick={() => setSubTab('approvals')}
@@ -587,6 +667,232 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
       )}
 
       {/* ================================================================= */}
+      {/* SUB-TAB: COUNCIL ROSTER & ACCESS CONTROL (DEACTIVATE / REACTIVATE)*/}
+      {/* ================================================================= */}
+      {subTab === 'roster' && (
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="font-serif text-lg font-semibold text-[#111111]">
+                Council Roster & Executive Access Control ({councilRoster.length})
+              </h3>
+              <p className="text-[12.5px] text-[#2b2b28]/70">
+                Manage appointed executive council members. Deactivating an officer immediately revokes their portal login privileges. You can reactivate them at any time.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={loadAll}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium border border-[#dcdcd8] bg-white text-[#2b2b28] hover:bg-[#ecece9] transition-colors self-start sm:self-auto cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Refresh Roster</span>
+            </button>
+          </div>
+
+          {/* Quick Metrics Bar */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="bg-white border border-[#dcdcd8] p-3.5">
+              <span className="text-[11px] uppercase tracking-wider text-[#2b2b28]/60 font-medium">Total Council Members</span>
+              <p className="font-serif text-2xl font-bold text-[#111111] mt-0.5">{councilRoster.length}</p>
+            </div>
+            <div className="bg-white border border-[#dcdcd8] p-3.5">
+              <span className="text-[11px] uppercase tracking-wider text-emerald-700 font-medium">Active · Login Permitted</span>
+              <p className="font-serif text-2xl font-bold text-emerald-700 mt-0.5">
+                {councilRoster.filter(e => e.status !== 'deactivated').length}
+              </p>
+            </div>
+            <div className="bg-white border border-[#dcdcd8] p-3.5">
+              <span className="text-[11px] uppercase tracking-wider text-rose-700 font-medium">Deactivated · Access Suspended</span>
+              <p className="font-serif text-2xl font-bold text-rose-700 mt-0.5">
+                {councilRoster.filter(e => e.status === 'deactivated').length}
+              </p>
+            </div>
+          </div>
+
+          {/* Search and Filter Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-[#dcdcd8] p-3">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Search by name, title, department, or E-Card ID..."
+                value={rosterSearch}
+                onChange={(e) => setRosterSearch(e.target.value)}
+                className="w-full text-[13px] px-3 py-2 border border-[#dcdcd8] focus:border-[#111111] focus:outline-none"
+              />
+            </div>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setRosterFilter('all')}
+                className={`px-3 py-1.5 text-[12px] font-medium transition-colors cursor-pointer ${
+                  rosterFilter === 'all'
+                    ? 'bg-[#111111] text-white'
+                    : 'bg-[#f4f4f0] text-[#2b2b28] hover:bg-[#ecece9]'
+                }`}
+              >
+                All ({councilRoster.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setRosterFilter('active')}
+                className={`px-3 py-1.5 text-[12px] font-medium transition-colors cursor-pointer ${
+                  rosterFilter === 'active'
+                    ? 'bg-emerald-700 text-white'
+                    : 'bg-[#f4f4f0] text-[#2b2b28] hover:bg-[#ecece9]'
+                }`}
+              >
+                Active ({councilRoster.filter(e => e.status !== 'deactivated').length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setRosterFilter('deactivated')}
+                className={`px-3 py-1.5 text-[12px] font-medium transition-colors cursor-pointer ${
+                  rosterFilter === 'deactivated'
+                    ? 'bg-rose-700 text-white'
+                    : 'bg-[#f4f4f0] text-[#2b2b28] hover:bg-[#ecece9]'
+                }`}
+              >
+                Deactivated ({councilRoster.filter(e => e.status === 'deactivated').length})
+              </button>
+            </div>
+          </div>
+
+          {/* Roster Cards List */}
+          {filteredRoster.length === 0 ? (
+            <div className="bg-white border border-[#dcdcd8] p-10 text-center space-y-2">
+              <Users className="w-8 h-8 text-[#2b2b28]/40 mx-auto" />
+              <h4 className="font-serif text-base font-semibold text-[#111111]">No matching council members</h4>
+              <p className="text-[13px] text-[#2b2b28]/60">
+                {rosterSearch
+                  ? 'No council members match your search criteria.'
+                  : 'No executives found in this filter category.'}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredRoster.map((exec) => {
+                const isDeactivated = exec.status === 'deactivated'
+                const isBusy = togglingId === exec.id
+                return (
+                  <div
+                    key={exec.id}
+                    className={`bg-white border p-4 transition-shadow space-y-3 ${
+                      isDeactivated
+                        ? 'border-rose-300 bg-rose-50/20'
+                        : exec.isCEO
+                        ? 'border-amber-300/80 bg-amber-50/10'
+                        : 'border-[#dcdcd8]'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        {exec.photo ? (
+                          <img
+                            src={exec.photo}
+                            alt={exec.name}
+                            className="w-12 h-12 object-cover rounded-full border border-[#dcdcd8] shrink-0"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-[#111111] text-white flex items-center justify-center font-bold text-base shrink-0">
+                            {exec.name.charAt(0)}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-serif text-[15px] font-semibold text-[#111111] truncate">{exec.name}</h4>
+                            {exec.isCEO && (
+                              <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 px-1.5 py-0.5 border border-amber-300">
+                                CEO
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[12.5px] font-medium text-[#2b2b28]/80 truncate">{exec.title}</p>
+                          <p className="text-[11.5px] text-[#2b2b28]/60 truncate">{exec.department}</p>
+                        </div>
+                      </div>
+
+                      {/* Status Badge */}
+                      <div className="shrink-0">
+                        {exec.isCEO ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded">
+                            <ShieldCheck className="w-3 h-3 text-amber-600" />
+                            <span>CEO Protected</span>
+                          </span>
+                        ) : isDeactivated ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium bg-rose-100 text-rose-800 border border-rose-300 px-2 py-0.5 rounded">
+                            <XCircle className="w-3 h-3 text-rose-600" />
+                            <span>Access Suspended</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                            <span>Login Permitted</span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-[11.5px] text-[#2b2b28]/70 pt-2 border-t border-[#ecece9]">
+                      <div>
+                        <span className="text-[#2b2b28]/40 block text-[10px] uppercase">E-Card ID</span>
+                        <span className="font-mono font-medium text-[#111111]">{exec.ecardId || 'N/A'}</span>
+                      </div>
+                      <div>
+                        <span className="text-[#2b2b28]/40 block text-[10px] uppercase">Rank Tier</span>
+                        <span className="font-medium text-[#111111]">{exec.rankTier}</span>
+                      </div>
+                      {exec.email && (
+                        <div className="col-span-2 truncate">
+                          <span className="text-[#2b2b28]/40 block text-[10px] uppercase">Official Email</span>
+                          <span className="font-mono text-[#111111]">{exec.email}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Governance Action Row */}
+                    <div className="pt-2 border-t border-[#ecece9] flex items-center justify-between gap-2">
+                      <span className="text-[11px] text-[#2b2b28]/50 truncate">
+                        {isDeactivated
+                          ? 'Account deactivated · Access suspended'
+                          : exec.isCEO
+                          ? 'Protected executive authority'
+                          : 'Full access to executive workspace'}
+                      </span>
+
+                      {exec.isCEO ? (
+                        <span className="text-[11px] italic text-[#2b2b28]/40 shrink-0">Permanent Access</span>
+                      ) : isDeactivated ? (
+                        <button
+                          type="button"
+                          disabled={isBusy}
+                          onClick={() => handleToggleExecutiveStatus(exec, 'active')}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer transition-colors disabled:opacity-50 shrink-0"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>{isBusy ? 'Reactivating...' : 'Reactivate Access'}</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={isBusy}
+                          onClick={() => handleToggleExecutiveStatus(exec, 'deactivated')}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-rose-700 bg-white border border-rose-300 hover:bg-rose-50 cursor-pointer transition-colors disabled:opacity-50 shrink-0"
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                          <span>{isBusy ? 'Deactivating...' : 'Deactivate Access'}</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+            {/* ================================================================= */}
       {/* SUB-TAB: TRACKS & WORKSHOPS FEATURE CONTROL (CEO ON/OFF TOGGLE)   */}
       {/* ================================================================= */}
       {subTab === 'tracks' && content && (

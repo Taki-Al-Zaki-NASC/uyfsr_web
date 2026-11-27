@@ -25,7 +25,7 @@ export interface Executive {
   ecardId: string
   activeSince: string
   bio: string
-  status?: 'active' | 'pending' | 'rejected'
+  status?: 'active' | 'pending' | 'rejected' | 'deactivated'
   appliedAt?: string
 }
 

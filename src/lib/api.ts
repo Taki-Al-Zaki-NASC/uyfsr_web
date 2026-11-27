@@ -595,7 +595,7 @@ export interface ExecutiveProfileData {
   ecardId: string
   activeSince: string
   bio: string
-  status?: 'active' | 'pending' | 'rejected'
+  status?: 'active' | 'pending' | 'rejected' | 'deactivated'
   appliedAt?: string
 }
 
@@ -756,6 +756,38 @@ export async function apiRejectExecutive(id: string, officerName?: string) {
     throw new Error(err.error || 'Failed to decline executive registration')
   }
   return res.json() as Promise<{ success: boolean; message: string }>
+}
+
+export async function apiGetCouncilRoster(officerName?: string): Promise<ExecutiveProfileData[]> {
+  try {
+    const res = await fetch(`${BASE_URL}/executives/roster`, {
+      headers: getAuthHeaders(officerName)
+    })
+    if (res.ok) {
+      const data = await res.json()
+      return data.roster || []
+    }
+  } catch {}
+
+  const fallback = await apiGetExecutives()
+  return fallback.executives || []
+}
+
+export async function apiUpdateExecutiveStatus(
+  id: string,
+  status: 'active' | 'deactivated',
+  officerName?: string
+) {
+  const res = await fetch(`${BASE_URL}/executives/${encodeURIComponent(id)}/status`, {
+    method: 'POST',
+    headers: getAuthHeaders(officerName),
+    body: JSON.stringify({ status })
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Status update failed' }))
+    throw new Error(err.error || 'Failed to update executive status')
+  }
+  return res.json() as Promise<{ success: boolean; message: string; executive: ExecutiveProfileData }>
 }
 
 // 12. Site Content CMS (Public Read / CEO-Only Publish)
