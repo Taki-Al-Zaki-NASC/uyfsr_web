@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { apiGetExecutives } from '../lib/api'
 import {
   Mail,
   ChevronLeft,
@@ -20,9 +21,11 @@ interface Leader {
   image: string
   facebookUrl?: string
   email?: string
+  phone?: string
+  dob?: string
 }
 
-const leaders: Leader[] = [
+const initialLeaders: Leader[] = [
   // Executive Council Leadership
   {
     name: "Mustafiz Bin Jihad",
@@ -169,6 +172,52 @@ function getLeaderImageStyle(name: string): React.CSSProperties {
 }
 
 export const AboutUs: React.FC = () => {
+  const [leaders, setLeaders] = useState<Leader[]>(initialLeaders)
+
+  useEffect(() => {
+    apiGetExecutives()
+      .then((res: any) => {
+        if (res && res.executives && res.executives.length > 0) {
+          setLeaders((prev) => {
+            const map = new Map<string, Leader>()
+            prev.forEach((l) => map.set(l.name.toLowerCase().trim(), { ...l }))
+            res.executives.forEach((e: any) => {
+              const key = e.name.toLowerCase().trim()
+              const existing = map.get(key)
+              if (existing) {
+                map.set(key, {
+                  ...existing,
+                  name: e.name,
+                  title: e.title || existing.title,
+                  department: e.department || existing.department,
+                  bio: e.bio || existing.bio,
+                  image: e.photo || existing.image,
+                  email: e.email || existing.email,
+                  phone: e.phone || existing.phone,
+                  dob: e.dob || existing.dob,
+                  facebookUrl: e.facebookUrl || existing.facebookUrl
+                })
+              } else {
+                map.set(key, {
+                  name: e.name,
+                  rankTier: (e.rankTier as any) || 'Secretariat',
+                  title: e.title || 'Executive Officer',
+                  department: e.department || 'Operations',
+                  bio: e.bio || 'Appointed executive officer of the United Youth Forum of Science and Research.',
+                  image: e.photo || '/images/executives/default.jpg',
+                  email: e.email,
+                  phone: e.phone,
+                  dob: e.dob,
+                  facebookUrl: e.facebookUrl || 'https://www.facebook.com/uyfsr'
+                })
+              }
+            })
+            return Array.from(map.values())
+          })
+        }
+      })
+      .catch(() => {})
+  }, [])
   const [selectedTier, setSelectedTier] = useState<string>('All')
   const [query, setQuery] = useState<string>('')
   const [viewFormat, setViewFormat] = useState<'showcase' | 'grid'>('showcase')

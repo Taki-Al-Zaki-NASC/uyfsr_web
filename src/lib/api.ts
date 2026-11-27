@@ -635,6 +635,16 @@ export async function apiUpdateMyProfile(
   return res.json() as Promise<{ success: boolean; message: string; officer: ExecutiveProfileData }>
 }
 
+export async function apiGetExecutives(): Promise<{ executives: ExecutiveProfileData[] }> {
+  try {
+    const res = await fetch(`${BASE_URL}/auth/executives`)
+    if (!res.ok) return { executives: [] }
+    return res.json()
+  } catch {
+    return { executives: [] }
+  }
+}
+
 export async function apiGetPendingExecutives(officerName?: string) {
   const res = await fetch(`${BASE_URL}/executives/pending`, {
     headers: getAuthHeaders(officerName)

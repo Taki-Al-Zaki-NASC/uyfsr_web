@@ -48,6 +48,7 @@ import {
   apiSendApplicantEmail,
   apiToggleMailedStatus,
   apiGetPendingExecutives,
+  apiGetExecutives,
   type SiteContentData,
   type ExecutiveProfileData
 } from '../lib/api'
@@ -87,7 +88,7 @@ interface ExecutiveProfile {
 
 const executiveTeam: ExecutiveProfile[] = [
   {
-    id: 'UYFSR-ADV-001',
+    id: 'UYFSR-ADV-8E2B-927A',
     name: 'Khaled Saifullah Rohan',
     rankTier: 'Advisors',
     title: 'Adviser',
@@ -103,7 +104,7 @@ const executiveTeam: ExecutiveProfile[] = [
     ]
   },
   {
-    id: 'UYFSR-CP-001',
+    id: 'UYFSR-CEO-8F42-9D1B',
     name: 'Mustafiz Bin Jihad',
     rankTier: 'Executive Council',
     title: 'Chief Executive Officer (CEO)',
@@ -233,7 +234,7 @@ const executiveTeam: ExecutiveProfile[] = [
     ]
   },
   {
-    id: 'UYFSR-ADV-002',
+    id: 'UYFSR-ADV-4C91-61F8',
     name: 'Oasimul Rafin',
     rankTier: 'Advisors',
     title: 'Adviser',
@@ -248,13 +249,14 @@ const executiveTeam: ExecutiveProfile[] = [
     ]
   },
   {
-    id: 'UYFSR-SEC-001',
+    id: 'UYFSR-SEC-84D2-9K1F',
     name: 'Taki Al Zaki',
     rankTier: 'Senior Executive',
     title: 'Secretary of Technology',
     department: 'Technology & Digital Systems',
     email: 'ktahan629@gmail.com',
     phone: '+880 1911-287501',
+    dob: '10/15/2009',
     image: '/images/executives/taki-al-zaki-secretary-of-technology.jpg',
     issueDate: '30 May 2025',
     clearanceLevel: 'Clearance Tier 2 · Technical Secretariat',
@@ -414,7 +416,56 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   // Edit My Profile modal state
   const [showEditProfileModal, setShowEditProfileModal] = useState(false)
+  const [directoryList, setDirectoryList] = useState<ExecutiveProfile[]>(executiveTeam)
   const [pendingExecCount, setPendingExecCount] = useState(0)
+  useEffect(() => {
+    apiGetExecutives()
+      .then((res: any) => {
+        if (res && res.executives && res.executives.length > 0) {
+          setDirectoryList((prev) => {
+            const map = new Map<string, ExecutiveProfile>()
+            prev.forEach((e) => map.set(e.name.toLowerCase().trim(), { ...e }))
+            res.executives.forEach((e: any) => {
+              const key = e.name.toLowerCase().trim()
+              const existing = map.get(key)
+              if (existing) {
+                map.set(key, {
+                  ...existing,
+                  name: e.name,
+                  title: e.title || existing.title,
+                  department: e.department || existing.department,
+                  bio: e.bio || existing.bio,
+                  image: e.photo || existing.image,
+                  email: e.email || existing.email,
+                  phone: e.phone || existing.phone,
+                  dob: e.dob || existing.dob,
+                  id: e.ecardId || existing.id,
+                  facebookUrl: e.facebookUrl || existing.facebookUrl
+                })
+              } else {
+                map.set(key, {
+                  id: e.ecardId || 'UYFSR-EXEC-NEW',
+                  name: e.name,
+                  rankTier: (e.rankTier as any) || 'Secretariat',
+                  title: e.title || 'Executive Officer',
+                  department: e.department || 'General Secretariat',
+                  email: e.email || 'uyfsr.org@gmail.com',
+                  phone: e.phone || '+880 1911-287501',
+                  dob: e.dob,
+                  image: e.photo || '/images/executives/default.jpg',
+                  issueDate: e.activeSince || '30 May 2025',
+                  clearanceLevel: 'Clearance Tier 4 · Executive Council',
+                  portfolioTasks: []
+                })
+              }
+            })
+            return Array.from(map.values())
+          })
+        }
+      })
+      .catch(() => {})
+  }, [profileOverride])
+
 
   // Current active officer profile merged with live backend data
   const staticMatch = executiveTeam.find(
@@ -1219,7 +1270,7 @@ Dhaka, Bangladesh · Official Email: uyfsr.org@gmail.com`
     toast.success(`Copied Official Member ID: ${currentProfile.id}`)
   }
 
-  const filteredDirectory = executiveTeam.filter((exec) => {
+  const filteredDirectory = directoryList.filter((exec) => {
     const matchesTier = dirTierFilter === 'All' || exec.rankTier === dirTierFilter
     const matchesSearch =
       exec.name.toLowerCase().includes(dirSearch.toLowerCase()) ||
@@ -1461,7 +1512,7 @@ Dhaka, Bangladesh · Official Email: uyfsr.org@gmail.com`
                 : 'text-[#2b2b28] hover:text-[#111111]'
             }`}
           >
-            Directory ({executiveTeam.length})
+            Directory ({directoryList.length})
           </button>
 
           <button
@@ -2545,6 +2596,12 @@ Dhaka, Bangladesh · Official Email: uyfsr.org@gmail.com`
                       <span>Contact:</span>
                       <span className="text-[#111111]">{exec.phone}</span>
                     </div>
+                    {exec.dob && (
+                      <div className="flex justify-between text-[#2b2b28]">
+                        <span>Date of Birth:</span>
+                        <span className="text-[#111111] font-mono">{exec.dob}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-[#2b2b28]">
                       <span>Member ID:</span>
                       <span className="text-[12px] text-[#0c7866]">{exec.id}</span>
@@ -3057,6 +3114,23 @@ Dhaka, Bangladesh · Official Email: uyfsr.org@gmail.com`
           onClose={() => setShowEditProfileModal(false)}
           onSaved={(updated) => {
             setProfileOverride(updated)
+            setDirectoryList((prev) =>
+              prev.map((e) =>
+                e.name.toLowerCase() === currentProfile.name.toLowerCase() || e.id === updated.id
+                  ? {
+                      ...e,
+                      name: updated.name || e.name,
+                      email: updated.email || e.email,
+                      phone: updated.phone || e.phone,
+                      dob: updated.dob || e.dob,
+                      department: updated.department || e.department,
+                      bio: updated.bio || e.bio,
+                      image: updated.photo || e.image,
+                      facebookUrl: updated.facebookUrl || e.facebookUrl
+                    }
+                  : e
+              )
+            )
             try {
               localStorage.setItem('uyfsr_executive_officer', JSON.stringify(updated))
             } catch {}
