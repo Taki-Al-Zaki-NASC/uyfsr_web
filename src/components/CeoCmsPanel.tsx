@@ -471,10 +471,32 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
       {/* ================================================================= */}
       {subTab === 'approvals' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-serif text-lg font-semibold text-[#111111]">
-              Pending Executive Registrations ({pendingExecs.length})
-            </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="font-serif text-lg font-semibold text-[#111111]">
+                Pending Executive Registrations ({pendingExecs.length})
+              </h3>
+              <p className="text-[12.5px] text-[#2b2b28]/70">
+                Newly registered executive candidate profiles awaiting CEO ratifications.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                sounds.playClick()
+                try {
+                  const list = await apiGetPendingExecutives(officerName)
+                  setPendingExecs(list)
+                  toast.success(`Registrations refreshed: ${list.length} pending candidate(s).`)
+                } catch {
+                  toast.error('Failed to reload pending registrations.')
+                }
+              }}
+              className="px-3.5 py-1.5 bg-[#ecece9] hover:bg-[#111111] hover:text-white text-[#111111] text-[12px] font-medium transition-colors cursor-pointer inline-flex items-center gap-1.5 w-fit"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Refresh Candidates</span>
+            </button>
           </div>
 
           {pendingExecs.length === 0 ? (

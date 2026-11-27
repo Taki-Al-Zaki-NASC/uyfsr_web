@@ -612,6 +612,34 @@ export async function apiRegisterExecutive(payload: {
   facebookUrl?: string
   rankTier?: 'Executive Council' | 'Advisors' | 'Secretariat'
 }) {
+  const localItem: ExecutiveProfileData = {
+    id: `exec-${Date.now()}`,
+    name: payload.name.trim(),
+    email: payload.email.trim(),
+    phone: payload.phone.trim(),
+    dob: payload.dob,
+    title: payload.title.trim() || 'Executive Member',
+    department: payload.department.trim() || 'General Secretariat',
+    rankTier: payload.rankTier || 'Secretariat',
+    bio: payload.bio.trim() || 'Appointed member of UYFSR Executive Secretariat.',
+    photo: payload.photo,
+    facebookUrl: payload.facebookUrl,
+    isCEO: false,
+    ecardId: `UYFSR-EXEC-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+    activeSince: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+    status: 'pending',
+    appliedAt: new Date().toISOString()
+  }
+
+  try {
+    const raw = typeof window !== 'undefined' ? localStorage.getItem('uyfsr_pending_executives') : null
+    const list: ExecutiveProfileData[] = raw ? JSON.parse(raw) : []
+    list.unshift(localItem)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('uyfsr_pending_executives', JSON.stringify(list.slice(0, 50)))
+    }
+  } catch {}
+
   const res = await fetch(`${BASE_URL}/auth/executive-register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -661,15 +689,28 @@ export async function apiGetExecutives(): Promise<{ executives: ExecutiveProfile
 }
 
 export async function apiGetPendingExecutives(officerName?: string) {
-  const res = await fetch(`${BASE_URL}/executives/pending`, {
-    headers: getAuthHeaders(officerName)
-  })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: 'Failed to load pending accounts' }))
-    throw new Error(err.error || 'Failed to load pending executives')
-  }
-  const data = await res.json()
-  return (data.pending || []) as ExecutiveProfileData[]
+  let localList: ExecutiveProfileData[] = []
+  try {
+    const raw = typeof window !== 'undefined' ? localStorage.getItem('uyfsr_pending_executives') : null
+    if (raw) localList = JSON.parse(raw)
+  } catch {}
+
+  try {
+    const res = await fetch(`${BASE_URL}/executives/pending`, {
+      headers: getAuthHeaders(officerName)
+    })
+    if (res.ok) {
+      const data = await res.json()
+      const serverList = (data.pending || []) as ExecutiveProfileData[]
+      const map = new Map<string, ExecutiveProfileData>()
+      for (const item of [...serverList, ...localList]) {
+        map.set(item.id, item)
+      }
+      return Array.from(map.values())
+    }
+  } catch {}
+
+  return localList
 }
 
 export async function apiApproveExecutive(
@@ -677,6 +718,14 @@ export async function apiApproveExecutive(
   options?: { title?: string; rankTier?: string },
   officerName?: string
 ) {
+  try {
+    const raw = typeof window !== 'undefined' ? localStorage.getItem('uyfsr_pending_executives') : null
+    if (raw) {
+      const list = JSON.parse(raw).filter((item: any) => item.id !== id)
+      localStorage.setItem('uyfsr_pending_executives', JSON.stringify(list))
+    }
+  } catch {}
+
   const res = await fetch(`${BASE_URL}/executives/${encodeURIComponent(id)}/approve`, {
     method: 'POST',
     headers: getAuthHeaders(officerName),
@@ -690,6 +739,14 @@ export async function apiApproveExecutive(
 }
 
 export async function apiRejectExecutive(id: string, officerName?: string) {
+  try {
+    const raw = typeof window !== 'undefined' ? localStorage.getItem('uyfsr_pending_executives') : null
+    if (raw) {
+      const list = JSON.parse(raw).filter((item: any) => item.id !== id)
+      localStorage.setItem('uyfsr_pending_executives', JSON.stringify(list))
+    }
+  } catch {}
+
   const res = await fetch(`${BASE_URL}/executives/${encodeURIComponent(id)}/reject`, {
     method: 'POST',
     headers: getAuthHeaders(officerName)

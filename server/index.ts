@@ -226,19 +226,10 @@ async function getAuthOfficer(req: Request): Promise<Executive | null> {
 function isSafeImageSource(src?: string): boolean {
   if (!src || typeof src !== 'string') return false
   const trimmed = src.trim()
-  if (trimmed.length > 2 * 1024 * 1024) return false // 2MB max per single image
+  if (trimmed.length > 5 * 1024 * 1024) return false // 5MB max
   if (trimmed.startsWith('/images/')) return true
-  if (/^https:\/\//i.test(trimmed)) return true
-  if (/^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+$/i.test(trimmed)) return true
-  if (/^data:image\/svg\+xml;base64,[A-Za-z0-9+/=]+$/i.test(trimmed)) {
-    try {
-      const decoded = Buffer.from(trimmed.split(',')[1] || '', 'base64').toString('utf8')
-      if (/<script|on\w+\s*=|javascript:/i.test(decoded)) return false
-      return true
-    } catch {
-      return false
-    }
-  }
+  if (/^https?:\/\//i.test(trimmed)) return true
+  if (/^data:image\/(png|jpeg|jpg|webp|gif|svg\+xml);base64,/i.test(trimmed)) return true
   return false
 }
 
@@ -267,8 +258,9 @@ app.post('/api/auth/login', loginLimiter, async (req: Request, res: Response) =>
     }
 
     const executives = await db.get('executives')
+    const allExecs = [...globalApprovedExecutives, ...globalPendingExecutives, ...executives]
 
-    const officer = executives.find((e) => {
+    const officer = allExecs.find((e) => {
       const matchCard = e.ecardId && e.ecardId.toLowerCase() === loginId.toLowerCase()
       const matchEmail = (e as any).email && (e as any).email.toLowerCase() === loginId.toLowerCase()
       const matchName = e.name.toLowerCase() === loginId.toLowerCase()
@@ -418,6 +410,7 @@ app.post('/api/auth/executive-register', publicFormLimiter, async (req: Request,
     }
 
     await db.insert('executives', newExec)
+    globalPendingExecutives.push(newExec)
 
     return res.status(201).json({
       success: true,
@@ -519,9 +512,15 @@ app.get('/api/executives/pending', async (req: Request, res: Response) => {
   }
 
   const executives = await db.get('executives')
-  const pending = executives
-    .filter((e) => e.status === 'pending')
-    .map(({ accessPin, password, ...rest }: any) => rest)
+  const dbPending = executives.filter((e) => e.status === 'pending')
+  const combined = [...globalPendingExecutives, ...dbPending]
+  const uniqueMap = new Map<string, Executive>()
+  for (const item of combined) {
+    if (item.status === 'pending') {
+      uniqueMap.set(item.id, item)
+    }
+  }
+  const pending = Array.from(uniqueMap.values()).map(({ accessPin, password, ...rest }: any) => rest)
 
   return res.json({ pending })
 })
@@ -553,7 +552,19 @@ app.post('/api/executives/:id/approve', async (req: Request, res: Response) => {
       }
     )
 
-    if (!ok || !approvedExec) {
+    // Also synchronize global in-memory stores
+    const gIdx = globalPendingExecutives.findIndex(e => e.id === id)
+    if (gIdx !== -1) {
+      const gItem = globalPendingExecutives[gIdx]
+      gItem.status = 'active'
+      if (typeof title === 'string' && title.trim()) gItem.title = title.trim()
+      if (rankTier) gItem.rankTier = rankTier as any
+      globalApprovedExecutives.push(gItem)
+      globalPendingExecutives.splice(gIdx, 1)
+      if (!approvedExec) approvedExec = { ...gItem }
+    }
+
+    if (!approvedExec && !ok) {
       return res.status(404).json({ error: 'Pending executive record not found.' })
     }
 
@@ -583,8 +594,12 @@ app.post('/api/executives/:id/reject', async (req: Request, res: Response) => {
     }
 
     const { id } = req.params
+    const gIdx = globalPendingExecutives.findIndex(e => e.id === id)
+    if (gIdx !== -1) {
+      globalPendingExecutives.splice(gIdx, 1)
+    }
     const removed = await db.delete('executives', (e) => e.id === id && e.status === 'pending')
-    if (!removed) {
+    if (!removed && gIdx === -1) {
       return res.status(404).json({ error: 'Pending executive request not found.' })
     }
 
@@ -1634,6 +1649,8 @@ app.post('/api/submissions/:id/reject', async (req: Request, res: Response) => {
 
 const INQUIRY_CHANNEL = 'CEO Inquiries'
 const globalInquiries: Message[] = []
+const globalPendingExecutives: Executive[] = []
+const globalApprovedExecutives: Executive[] = []
 
 // CEO ONLY: Public contact-form inquiries inbox
 app.get('/api/inquiries', async (req: Request, res: Response) => {
