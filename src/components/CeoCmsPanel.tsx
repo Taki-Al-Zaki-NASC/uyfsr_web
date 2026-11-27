@@ -402,12 +402,33 @@ export const CeoCmsPanel: React.FC<CeoCmsPanelProps> = ({
 
       {subTab === 'inquiries' && (
         <div className="space-y-4">
-          <h3 className="font-serif text-lg font-semibold text-[#111111]">
-            Public Inquiries ({inquiries.length})
-          </h3>
-          <p className="text-[12.5px] text-[#2b2b28]/70">
-            Messages sent through "Contact the Secretariat" on the main site. Visible to the CEO only.
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="font-serif text-lg font-semibold text-[#111111]">
+                Public Inquiries ({inquiries.length})
+              </h3>
+              <p className="text-[12.5px] text-[#2b2b28]/70">
+                Messages sent through "Contact the Secretariat" on the main site. Visible to the CEO only.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                sounds.playClick()
+                try {
+                  const list = await apiGetInquiries(officerName)
+                  setInquiries(list)
+                  toast.success(`Inquiries refreshed: ${list.length} records active.`)
+                } catch {
+                  toast.error('Failed to reload inquiries.')
+                }
+              }}
+              className="px-3.5 py-1.5 bg-[#ecece9] hover:bg-[#111111] hover:text-white text-[#111111] text-[12px] font-medium transition-colors cursor-pointer inline-flex items-center gap-1.5 w-fit"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Refresh Inbox</span>
+            </button>
+          </div>
           {inquiries.length === 0 ? (
             <div className="p-8 bg-white border border-[#ecece9] text-center text-[13px] text-[#2b2b28]/70">
               No public inquiries yet.

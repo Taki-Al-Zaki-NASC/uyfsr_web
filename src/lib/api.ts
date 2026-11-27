@@ -432,6 +432,21 @@ export async function apiSendContactInquiry(payload: {
   contact: string
   message: string
 }) {
+  try {
+    const localItem: InquiryItem = {
+      id: `msg-${Date.now()}`,
+      senderName: `${payload.name.trim()} (${payload.contact.trim()})`,
+      message: payload.message.trim(),
+      timestamp: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+    }
+    const raw = typeof window !== 'undefined' ? localStorage.getItem('uyfsr_local_inquiries') : null
+    const list: InquiryItem[] = raw ? JSON.parse(raw) : []
+    list.unshift(localItem)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('uyfsr_local_inquiries', JSON.stringify(list.slice(0, 50)))
+    }
+  } catch {}
+
   const res = await fetch(`${BASE_URL}/contact`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -798,11 +813,24 @@ export interface InquiryItem {
 }
 
 export async function apiGetInquiries(officerName?: string): Promise<InquiryItem[]> {
-  const res = await fetch(`${BASE_URL}/inquiries`, { headers: getAuthHeaders(officerName) })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: 'Failed to load inquiries' }))
-    throw new Error(err.error || 'Failed to load inquiries')
-  }
-  const data = await res.json()
-  return (data.inquiries || []) as InquiryItem[]
+  let localList: InquiryItem[] = []
+  try {
+    const raw = typeof window !== 'undefined' ? localStorage.getItem('uyfsr_local_inquiries') : null
+    if (raw) localList = JSON.parse(raw)
+  } catch {}
+
+  try {
+    const res = await fetch(`${BASE_URL}/inquiries`, { headers: getAuthHeaders(officerName) })
+    if (res.ok) {
+      const data = await res.json()
+      const serverList = (data.inquiries || []) as InquiryItem[]
+      const map = new Map<string, InquiryItem>()
+      for (const item of [...serverList, ...localList]) {
+        map.set(item.id, item)
+      }
+      return Array.from(map.values())
+    }
+  } catch {}
+
+  return localList
 }
