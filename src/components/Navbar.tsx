@@ -102,7 +102,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 sounds.playClick()
                 onOpenLogin()
               }}
-              className="hidden sm:inline-flex h-10 px-4 items-center justify-center text-[13px] sm:text-[14px] text-white hover:text-[#111111] bg-[#111111] hover:bg-transparent border border-[#111111] font-medium transition-colors cursor-pointer shrink-0"
+              className="hidden sm:inline-flex h-10 px-4 items-center justify-center text-[13px] sm:text-[14px] text-white hover:text-[#111111] bg-[#111111] hover:bg-transparent hover:shadow-xs active:bg-[#ecece9] active:text-[#111111] border border-[#111111] font-medium transition-all duration-200 active:scale-[0.98] cursor-pointer shrink-0"
             >
               Executive Portal
             </button>
@@ -113,7 +113,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               sounds.playClick()
               onOpenJoin()
             }}
-            className="h-10 px-3 sm:px-5 flex items-center justify-center bg-[#0c7866] hover:bg-[#095f51] text-white font-medium text-[13px] sm:text-[14px] transition-colors cursor-pointer shrink-0 whitespace-nowrap"
+            className="h-10 px-3 sm:px-5 flex items-center justify-center bg-[#0c7866] hover:bg-[#095f51] hover:shadow-xs active:bg-[#084f43] text-white font-medium text-[13px] sm:text-[14px] transition-all duration-200 active:scale-[0.98] cursor-pointer shrink-0 whitespace-nowrap"
           >
             Join the Event
           </button>
@@ -217,7 +217,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   setMobileMenuOpen(false)
                   onOpenLogin()
                 }}
-                className="w-full flex items-center justify-between px-3.5 py-2.5 bg-[#111111] hover:bg-transparent border border-[#111111] text-white hover:text-[#111111] text-[13.5px] font-medium transition-colors cursor-pointer group"
+                className="w-full flex items-center justify-between px-3.5 py-2.5 bg-[#111111] hover:bg-transparent active:bg-[#ecece9] border border-[#111111] text-white hover:text-[#111111] active:text-[#111111] text-[13.5px] font-medium transition-all duration-200 active:scale-[0.99] cursor-pointer group"
               >
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#0c7866]" />
