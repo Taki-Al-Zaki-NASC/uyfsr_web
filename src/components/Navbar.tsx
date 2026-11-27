@@ -102,7 +102,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 sounds.playClick()
                 onOpenLogin()
               }}
-              className="hidden sm:inline-flex h-10 px-4 items-center justify-center text-[13px] sm:text-[14px] text-[#111111] hover:text-white bg-transparent hover:bg-[#111111] border border-[#111111] font-medium transition-colors cursor-pointer shrink-0"
+              className="hidden sm:inline-flex h-10 px-4 items-center justify-center text-[13px] sm:text-[14px] text-white hover:text-[#111111] bg-[#111111] hover:bg-transparent border border-[#111111] font-medium transition-colors cursor-pointer shrink-0"
             >
               Executive Portal
             </button>
@@ -217,13 +217,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                   setMobileMenuOpen(false)
                   onOpenLogin()
                 }}
-                className="w-full flex items-center justify-between px-3.5 py-2.5 bg-white hover:bg-[#ecece9] border border-[#dcdcd8] text-[#111111] text-[13.5px] font-medium transition-colors cursor-pointer group"
+                className="w-full flex items-center justify-between px-3.5 py-2.5 bg-[#111111] hover:bg-transparent border border-[#111111] text-white hover:text-[#111111] text-[13.5px] font-medium transition-colors cursor-pointer group"
               >
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#0c7866]" />
                   <span>Executive Portal</span>
                 </div>
-                <span className="text-[12px] text-[#2b2b28]/70 group-hover:text-[#111111] font-medium flex items-center gap-1">
+                <span className="text-[12px] text-white/80 group-hover:text-[#111111] font-medium flex items-center gap-1">
                   Login &rarr;
                 </span>
               </button>

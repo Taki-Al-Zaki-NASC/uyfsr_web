@@ -9,7 +9,6 @@ import { HowItWorks } from './components/HowItWorks'
 import { Partners } from './components/Partners'
 import { AboutUs } from './components/AboutUs'
 import { FAQ } from './components/FAQ'
-import { MobileBottomNav } from './components/MobileBottomNav'
 
 // High-Performance Dynamic Imports & Code Splitting (Reduces initial bundle by >65%)
 const Dashboard = lazy(() => import('./components/Dashboard').then((m) => ({ default: m.Dashboard })))
@@ -338,7 +337,7 @@ export function App() {
 
   // VIEW 4: Main UYFSR Public Home Page
   return (
-    <div className="relative min-h-[100svh] bg-[#f7f7f5] text-[#111111] flex flex-col pb-16 md:pb-0 selection:bg-[#0c7866]/20 selection:text-[#0c7866]">
+    <div className="relative min-h-[100svh] bg-[#f7f7f5] text-[#111111] flex flex-col selection:bg-[#0c7866]/20 selection:text-[#0c7866]">
             <Toaster
         theme="light"
         position="bottom-right"
@@ -453,15 +452,6 @@ export function App() {
 
       {/* Footer */}
       <Footer onOpenDonate={() => setDonateModalOpen(true)} />
-
-      {/* Mobile-Only Dedicated Bottom Navigation Bar */}
-      <MobileBottomNav
-        currentOfficer={currentOfficer}
-        activeView={pageView}
-        onNavigateHome={(anchor) => goToHome(anchor)}
-        onOpenLogin={goToLogin}
-        onOpenDashboard={goToDashboard}
-      />
     </div>
   )
 }
